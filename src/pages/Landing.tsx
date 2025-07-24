@@ -1,8 +1,10 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowRight, Zap, Brain, Shield, Gauge, Users, BookOpen } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { ArrowRight, Zap, Brain, Shield, Gauge, Users, BookOpen, Bell, Wrench, Calculator } from 'lucide-react';
 import heroImage from '@/assets/grow-hero.jpg';
+import BuildPlannerPreview from '@/components/build-planner/BuildPlannerPreview';
 
 const Landing = () => {
   return (
@@ -41,43 +43,50 @@ const Landing = () => {
             <div className="space-y-8">
               <div className="space-y-4">
                 <Badge variant="secondary" className="w-fit">
-                  <Zap className="w-3 h-3 mr-1" />
-                  Smart Automation
+                  <Bell className="w-3 h-3 mr-1" />
+                  Coming Soon
                 </Badge>
                 <h1 className="text-4xl lg:text-6xl font-bold leading-tight">
-                  Grow Better Plants with{' '}
+                  The Future of{' '}
                   <span className="bg-gradient-primary bg-clip-text text-transparent">
-                    Smart Technology
-                  </span>
+                    Smart Growing
+                  </span>{' '}
+                  is Almost Here
                 </h1>
                 <p className="text-xl text-muted-foreground max-w-lg">
-                  Transform your indoor growing with our Arduino-powered monitoring system and intelligent dashboard. 
-                  No more guesswork, no more failed grows.
+                  We're building the ultimate ecosystem for home growers - from planning your setup 
+                  to harvesting your success. Be the first to know when we launch.
                 </p>
               </div>
               
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" variant="glow" className="group">
-                  Start Growing Smarter
-                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                </Button>
-                <Button size="lg" variant="outline">
-                  View Products
-                </Button>
+              <div className="space-y-4">
+                <div className="flex flex-col sm:flex-row gap-3 max-w-md">
+                  <Input 
+                    placeholder="Enter your email for early access"
+                    className="flex-1"
+                  />
+                  <Button variant="glow" className="group">
+                    Get Notified
+                    <Bell className="ml-2 h-4 w-4" />
+                  </Button>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Join <span className="font-semibold text-cannabis-primary">2,847</span> growers already on the waitlist
+                </p>
               </div>
 
               <div className="grid grid-cols-3 gap-6 pt-8 border-t border-border/40">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-cannabis-primary">98%</div>
-                  <div className="text-sm text-muted-foreground">Success Rate</div>
+                  <div className="text-2xl font-bold text-cannabis-primary">Q1 2025</div>
+                  <div className="text-sm text-muted-foreground">Launch Date</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-cannabis-primary">24/7</div>
-                  <div className="text-sm text-muted-foreground">Monitoring</div>
+                  <div className="text-2xl font-bold text-cannabis-primary">$199</div>
+                  <div className="text-sm text-muted-foreground">Early Bird Price</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-cannabis-primary">5k+</div>
-                  <div className="text-sm text-muted-foreground">Growers</div>
+                  <div className="text-2xl font-bold text-cannabis-primary">2.8k</div>
+                  <div className="text-sm text-muted-foreground">Waitlist</div>
                 </div>
               </div>
             </div>
@@ -99,24 +108,24 @@ const Landing = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-4 mb-16">
             <h2 className="text-3xl lg:text-5xl font-bold">
-              Everything You Need to{' '}
-              <span className="bg-gradient-primary bg-clip-text text-transparent">Succeed</span>
+              What We're{' '}
+              <span className="bg-gradient-primary bg-clip-text text-transparent">Building</span>
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Our complete ecosystem combines cutting-edge hardware with intelligent software 
-              to make growing as simple as possible.
+              A complete ecosystem that takes you from planning your first grow to 
+              mastering advanced techniques - all in one platform.
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             <Card className="p-6 bg-card/50 backdrop-blur border-border/50 hover:shadow-glow transition-all duration-300">
               <div className="w-12 h-12 bg-gradient-primary rounded-lg flex items-center justify-center mb-4">
-                <Gauge className="w-6 h-6 text-background" />
+                <Wrench className="w-6 h-6 text-background" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">Real-time Monitoring</h3>
+              <h3 className="text-xl font-semibold mb-2">Smart Build Planner</h3>
               <p className="text-muted-foreground">
-                Track pH, TDS, temperature, humidity, CO₂, and light levels with precision sensors 
-                that never sleep.
+                Plan your perfect grow setup with our PC Part Picker-style configurator. 
+                Calculate costs, power usage, and compatibility - all in one place.
               </p>
             </Card>
 
@@ -124,21 +133,21 @@ const Landing = () => {
               <div className="w-12 h-12 bg-gradient-primary rounded-lg flex items-center justify-center mb-4">
                 <Brain className="w-6 h-6 text-background" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">AI-Powered Insights</h3>
+              <h3 className="text-xl font-semibold mb-2">Educational Hub</h3>
               <p className="text-muted-foreground">
-                Get intelligent recommendations based on your data patterns and growing history 
-                for optimal results.
+                Access cutting-edge grow guides, Arduino tutorials, and research data 
+                that you won't find anywhere else.
               </p>
             </Card>
 
             <Card className="p-6 bg-card/50 backdrop-blur border-border/50 hover:shadow-glow transition-all duration-300">
               <div className="w-12 h-12 bg-gradient-primary rounded-lg flex items-center justify-center mb-4">
-                <Shield className="w-6 h-6 text-background" />
+                <Gauge className="w-6 h-6 text-background" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">Automated Protection</h3>
+              <h3 className="text-xl font-semibold mb-2">Arduino Automation</h3>
               <p className="text-muted-foreground">
-                Instant alerts and automated responses protect your plants from environmental 
-                threats before damage occurs.
+                Professional monitoring hardware with real-time sensors, automated responses, 
+                and seamless dashboard integration.
               </p>
             </Card>
           </div>
@@ -150,73 +159,45 @@ const Landing = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-4 mb-16">
             <h2 className="text-3xl lg:text-5xl font-bold">
-              Hardware That{' '}
-              <span className="bg-gradient-primary bg-clip-text text-transparent">Just Works</span>
+              Plan Your{' '}
+              <span className="bg-gradient-primary bg-clip-text text-transparent">Perfect Setup</span>
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Professional-grade monitoring and control systems in a plug-and-play package.
+              Start planning today with our build configurator. Design your grow room, 
+              calculate costs, and get ready for launch day.
             </p>
           </div>
 
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-6">
-              <Card className="p-6 border-border/50">
-                <h3 className="text-xl font-semibold mb-4">GrowTracker Pro Kit</h3>
-                <ul className="space-y-3 text-muted-foreground">
-                  <li className="flex items-center">
-                    <div className="w-2 h-2 bg-cannabis-primary rounded-full mr-3"></div>
-                    Arduino-based controller with WiFi connectivity
-                  </li>
-                  <li className="flex items-center">
-                    <div className="w-2 h-2 bg-cannabis-primary rounded-full mr-3"></div>
-                    pH, TDS, temperature, humidity, and CO₂ sensors
-                  </li>
-                  <li className="flex items-center">
-                    <div className="w-2 h-2 bg-cannabis-primary rounded-full mr-3"></div>
-                    3D-printed weatherproof enclosure
-                  </li>
-                  <li className="flex items-center">
-                    <div className="w-2 h-2 bg-cannabis-primary rounded-full mr-3"></div>
-                    Complete setup guide and community support
-                  </li>
-                </ul>
-                <div className="flex items-center justify-between pt-6 border-t border-border/40 mt-6">
-                  <div>
-                    <span className="text-2xl font-bold">$299</span>
-                    <span className="text-muted-foreground ml-1">USD</span>
-                  </div>
-                  <Button variant="cannabis">Pre-order Now</Button>
-                </div>
-              </Card>
-            </div>
+            <BuildPlannerPreview />
 
             <div className="space-y-6">
-              <h3 className="text-2xl font-semibold">Why Choose Our Hardware?</h3>
+              <h3 className="text-2xl font-semibold">Why Start Planning Now?</h3>
               <div className="space-y-4">
+                <div className="flex items-start space-x-3">
+                  <Calculator className="w-5 h-5 text-cannabis-primary mt-1" />
+                  <div>
+                    <h4 className="font-medium">Smart Budget Planning</h4>
+                    <p className="text-muted-foreground text-sm">
+                      See real costs, power usage, and ROI calculations before you spend a dime.
+                    </p>
+                  </div>
+                </div>
                 <div className="flex items-start space-x-3">
                   <Users className="w-5 h-5 text-cannabis-primary mt-1" />
                   <div>
-                    <h4 className="font-medium">Community-Driven Design</h4>
+                    <h4 className="font-medium">Community Recommendations</h4>
                     <p className="text-muted-foreground text-sm">
-                      Built by growers, for growers. Every feature comes from real-world experience.
+                      Get build suggestions from thousands of successful growers in our community.
                     </p>
                   </div>
                 </div>
                 <div className="flex items-start space-x-3">
                   <BookOpen className="w-5 h-5 text-cannabis-primary mt-1" />
                   <div>
-                    <h4 className="font-medium">Open Source & Customizable</h4>
+                    <h4 className="font-medium">Educational Integration</h4>
                     <p className="text-muted-foreground text-sm">
-                      All code and designs are open source. Modify and expand as much as you want.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <Zap className="w-5 h-5 text-cannabis-primary mt-1" />
-                  <div>
-                    <h4 className="font-medium">Plug & Play Setup</h4>
-                    <p className="text-muted-foreground text-sm">
-                      No soldering required. Connect sensors, power on, and start growing in minutes.
+                      Each component comes with tutorials, setup guides, and optimization tips.
                     </p>
                   </div>
                 </div>
@@ -231,37 +212,41 @@ const Landing = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-4 mb-16">
             <h2 className="text-3xl lg:text-5xl font-bold">
-              Learn from the{' '}
-              <span className="bg-gradient-primary bg-clip-text text-transparent">Best</span>
+              Educational Content{' '}
+              <span className="bg-gradient-primary bg-clip-text text-transparent">Coming Soon</span>
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Access cutting-edge growing knowledge, tutorials, and research that you won't find anywhere else.
+              We're creating the most comprehensive growing education platform. From beginner guides 
+              to advanced Arduino customization - everything you need to succeed.
             </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
             <Card className="p-6 bg-card/50 backdrop-blur border-border/50">
+              <Badge variant="secondary" className="mb-3">Coming Q1 2025</Badge>
               <h3 className="text-lg font-semibold mb-3">Complete Grow Guides</h3>
               <p className="text-muted-foreground text-sm mb-4">
-                Step-by-step instructions for every growth stage, from seed to harvest.
+                Step-by-step instructions for every growth stage, strain-specific guides, 
+                and troubleshooting for common issues.
               </p>
-              <Button variant="outline" size="sm">Explore Guides</Button>
             </Card>
 
             <Card className="p-6 bg-card/50 backdrop-blur border-border/50">
-              <h3 className="text-lg font-semibold mb-3">DIY Tutorials</h3>
+              <Badge variant="secondary" className="mb-3">In Development</Badge>
+              <h3 className="text-lg font-semibold mb-3">Arduino Tutorials</h3>
               <p className="text-muted-foreground text-sm mb-4">
-                Build your own monitoring systems with detailed video walkthroughs.
+                Build and customize your own monitoring systems with detailed video 
+                walkthroughs and open-source code.
               </p>
-              <Button variant="outline" size="sm">Watch Videos</Button>
             </Card>
 
             <Card className="p-6 bg-card/50 backdrop-blur border-border/50">
-              <h3 className="text-lg font-semibold mb-3">Research & Data</h3>
+              <Badge variant="secondary" className="mb-3">Research Hub</Badge>
+              <h3 className="text-lg font-semibold mb-3">Cutting-Edge Data</h3>
               <p className="text-muted-foreground text-sm mb-4">
-                Latest research findings and data-driven growing optimization techniques.
+                Latest research findings, growing optimization techniques, and 
+                community-contributed data insights.
               </p>
-              <Button variant="outline" size="sm">Read Research</Button>
             </Card>
           </div>
         </div>
@@ -272,23 +257,29 @@ const Landing = () => {
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <div className="space-y-8">
             <h2 className="text-3xl lg:text-5xl font-bold">
-              Ready to{' '}
+              Be Part of the{' '}
               <span className="bg-gradient-primary bg-clip-text text-transparent">
-                Transform
-              </span>{' '}
-              Your Growing?
+                Growing Revolution
+              </span>
             </h2>
             <p className="text-xl text-muted-foreground">
-              Join thousands of growers who've discovered the power of data-driven cultivation.
+              Join the waitlist and get exclusive early access, special pricing, and help shape 
+              the future of smart growing technology.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" variant="glow" className="group">
-                Start Your Journey
-                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-              </Button>
-              <Button size="lg" variant="outline">
-                View Demo
-              </Button>
+            <div className="space-y-4">
+              <div className="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto">
+                <Input 
+                  placeholder="Enter your email address"
+                  className="flex-1"
+                />
+                <Button size="lg" variant="glow" className="group">
+                  Join Waitlist
+                  <Bell className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Early bird pricing: Save 33% when we launch
+              </p>
             </div>
           </div>
         </div>
