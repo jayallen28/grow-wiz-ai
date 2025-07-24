@@ -5,14 +5,15 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, Plus } from 'lucide-react';
-import { BuildComponent, ComponentCategory } from '@/types/buildPlanner';
+import { BuildComponent, ComponentCategory, BuildComponentWithQuantity } from '@/types/buildPlanner';
 import { availableComponents } from '@/data/buildComponents';
 import ComponentCard from './ComponentCard';
+import CustomComponentForm from './CustomComponentForm';
 
 interface ComponentSelectorProps {
   onAddComponent: (component: BuildComponent) => void;
   selectedComponents: {
-    [category in ComponentCategory]?: BuildComponent[];
+    [category in ComponentCategory]?: BuildComponentWithQuantity[];
   };
 }
 
@@ -55,6 +56,7 @@ const ComponentSelector = ({ onAddComponent, selectedComponents }: ComponentSele
             onChange={(e) => setSearchTerm(e.target.value)}
             className="max-w-sm"
           />
+          <CustomComponentForm onAddComponent={onAddComponent} />
         </div>
       </CardHeader>
       <CardContent>

@@ -5,19 +5,20 @@ import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Trash2, DollarSign, Zap, Calculator } from 'lucide-react';
-import { BuildComponent, ComponentCategory, PowerCostCalculation } from '@/types/buildPlanner';
+import { BuildComponent, ComponentCategory, PowerCostCalculation, BuildComponentWithQuantity } from '@/types/buildPlanner';
 import { useState } from 'react';
 
 interface BuildSummaryProps {
   selectedComponents: {
-    [category in ComponentCategory]?: BuildComponent[];
+    [category in ComponentCategory]?: BuildComponentWithQuantity[];
   };
   totalCost: number;
   totalPower: number;
   onRemoveComponent: (componentId: string, category: ComponentCategory) => void;
+  onUpdateQuantity: (componentId: string, category: ComponentCategory, quantity: number) => void;
 }
 
-const BuildSummary = ({ selectedComponents, totalCost, totalPower, onRemoveComponent }: BuildSummaryProps) => {
+const BuildSummary = ({ selectedComponents, totalCost, totalPower, onRemoveComponent, onUpdateQuantity }: BuildSummaryProps) => {
   const [electricityRate, setElectricityRate] = useState(0.12); // Default to $0.12/kWh
   const [hoursPerDay, setHoursPerDay] = useState(18); // Default to 18 hours for vegetative stage
 
@@ -65,24 +66,50 @@ const BuildSummary = ({ selectedComponents, totalCost, totalPower, onRemoveCompo
               {allComponents.map((component) => (
                 <div key={component.id} className="flex items-center justify-between p-2 bg-accent/20 rounded-lg">
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{component.name}</p>
+                    <p className="text-sm font-medium truncate">
+                      {component.name}
+                      {component.isCustom && <Badge variant="secondary" className="ml-2 text-xs">Custom</Badge>}
+                    </p>
                     <div className="flex items-center gap-2 mt-1">
-                      <span className="text-xs text-primary font-semibold">${component.price}</span>
+                      <span className="text-xs text-primary font-semibold">
+                        ${component.price.toFixed(2)} {component.quantity > 1 && `x${component.quantity} = $${(component.price * component.quantity).toFixed(2)}`}
+                      </span>
                       {component.powerConsumption > 0 && (
                         <Badge variant="outline" className="text-xs">
                           <Zap className="w-2 h-2 mr-1" />
-                          {component.powerConsumption}W
+                          {component.powerConsumption}W{component.quantity > 1 && ` x${component.quantity}`}
                         </Badge>
                       )}
                     </div>
                   </div>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => onRemoveComponent(component.id, component.category)}
-                  >
-                    <Trash2 className="w-3 h-3" />
-                  </Button>
+                  <div className="flex items-center gap-1">
+                    <div className="flex items-center">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => onUpdateQuantity(component.id, component.category, component.quantity - 1)}
+                        className="h-6 w-6 p-0"
+                      >
+                        -
+                      </Button>
+                      <span className="text-xs font-medium w-6 text-center">{component.quantity}</span>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => onUpdateQuantity(component.id, component.category, component.quantity + 1)}
+                        className="h-6 w-6 p-0"
+                      >
+                        +
+                      </Button>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => onRemoveComponent(component.id, component.category)}
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>

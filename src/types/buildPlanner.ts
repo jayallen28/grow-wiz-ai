@@ -18,6 +18,11 @@ export interface BuildComponent {
   weight: number; // kg
   rating: number; // 1-5 stars
   reviewCount: number;
+  isCustom?: boolean; // True for user-added custom components
+}
+
+export interface BuildComponentWithQuantity extends BuildComponent {
+  quantity: number;
 }
 
 export type ComponentCategory = 
@@ -47,7 +52,7 @@ export interface BuildConfiguration {
   name: string;
   description?: string;
   components: {
-    [category in ComponentCategory]?: BuildComponent[];
+    [category in ComponentCategory]?: BuildComponentWithQuantity[];
   };
   totalCost: number;
   totalPowerConsumption: number;

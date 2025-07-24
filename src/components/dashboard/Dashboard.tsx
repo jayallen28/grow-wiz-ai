@@ -3,6 +3,7 @@ import { Thermometer, Droplets, Beaker, Wind, Sun, Activity } from 'lucide-react
 import { MetricCard } from './MetricCard';
 import { AlertPanel } from './AlertPanel';
 import { QuickActions } from './QuickActions';
+import BuildPlannerCard from './BuildPlannerCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, GrowCycle } from '@/types/grow';
@@ -169,9 +170,10 @@ export function Dashboard({ currentGrow }: DashboardProps) {
           <AlertPanel alerts={alerts} onDismiss={handleDismissAlert} />
         </div>
 
-        {/* Quick Actions */}
-        <div>
+        {/* Right Panel */}
+        <div className="space-y-6">
           <QuickActions onAction={handleQuickAction} />
+          <BuildPlannerCard />
         </div>
       </div>
 

@@ -5,17 +5,17 @@ import { ArrowLeft, Calculator } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import ComponentSelector from '@/components/build-planner/ComponentSelector';
 import BuildSummary from '@/components/build-planner/BuildSummary';
-import { BuildComponent, BuildConfiguration, ComponentCategory } from '@/types/buildPlanner';
+import { BuildComponent, BuildConfiguration, ComponentCategory, BuildComponentWithQuantity } from '@/types/buildPlanner';
 
 const BuildPlanner = () => {
   const [selectedComponents, setSelectedComponents] = useState<{
-    [category in ComponentCategory]?: BuildComponent[];
+    [category in ComponentCategory]?: BuildComponentWithQuantity[];
   }>({});
 
   const addComponent = (component: BuildComponent) => {
     setSelectedComponents(prev => ({
       ...prev,
-      [component.category]: [...(prev[component.category] || []), component]
+      [component.category]: [...(prev[component.category] || []), { ...component, quantity: 1 }]
     }));
   };
 
@@ -26,16 +26,30 @@ const BuildPlanner = () => {
     }));
   };
 
+  const updateComponentQuantity = (componentId: string, category: ComponentCategory, quantity: number) => {
+    if (quantity <= 0) {
+      removeComponent(componentId, category);
+      return;
+    }
+    
+    setSelectedComponents(prev => ({
+      ...prev,
+      [category]: prev[category]?.map(c => 
+        c.id === componentId ? { ...c, quantity } : c
+      ) || []
+    }));
+  };
+
   const getAllComponents = () => {
     return Object.values(selectedComponents).flat();
   };
 
   const getTotalCost = () => {
-    return getAllComponents().reduce((sum, component) => sum + component.price, 0);
+    return getAllComponents().reduce((sum, component) => sum + (component.price * component.quantity), 0);
   };
 
   const getTotalPower = () => {
-    return getAllComponents().reduce((sum, component) => sum + component.powerConsumption, 0);
+    return getAllComponents().reduce((sum, component) => sum + (component.powerConsumption * component.quantity), 0);
   };
 
   return (
@@ -75,6 +89,7 @@ const BuildPlanner = () => {
                 totalCost={getTotalCost()}
                 totalPower={getTotalPower()}
                 onRemoveComponent={removeComponent}
+                onUpdateQuantity={updateComponentQuantity}
               />
             </div>
           </div>
