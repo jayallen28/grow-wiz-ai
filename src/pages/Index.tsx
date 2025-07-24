@@ -1,5 +1,5 @@
 import { Navigation } from '@/components/layout/Navigation';
-import { Dashboard } from '@/components/dashboard/Dashboard';
+import { Dashboard as DashboardComponent } from '@/components/dashboard/Dashboard';
 import { GrowCycle, StrainProfile, GrowStage } from '@/types/grow';
 
 // Mock data for development
@@ -36,7 +36,7 @@ const mockGrowCycle: GrowCycle = {
   notes: 'First DWC grow, learning the ropes',
 };
 
-const Index = () => {
+const Dashboard = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -50,10 +50,10 @@ const Index = () => {
           </p>
         </div>
         
-        <Dashboard currentGrow={mockGrowCycle} />
+        <DashboardComponent currentGrow={mockGrowCycle} />
       </main>
     </div>
   );
 };
 
-export default Index;
+export default Dashboard;
