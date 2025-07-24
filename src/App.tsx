@@ -11,6 +11,7 @@ import Nutrients from "./pages/Nutrients";
 import Strains from "./pages/Strains";
 import Settings from "./pages/Settings";
 import BuildPlanner from "./pages/BuildPlanner";
+import Learn from "./pages/Learn";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/" element={<Landing />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/build-planner" element={<BuildPlanner />} />
+          <Route path="/learn" element={<Learn />} />
           <Route path="/journal" element={<Journal />} />
           <Route path="/environment" element={<Environment />} />
           <Route path="/nutrients" element={<Nutrients />} />

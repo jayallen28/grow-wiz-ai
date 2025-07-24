@@ -9,7 +9,8 @@ import {
   Settings,
   Menu,
   X,
-  Calculator
+  Calculator,
+  GraduationCap
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -17,6 +18,7 @@ import { cn } from '@/lib/utils';
 const navigationItems = [
   { name: 'Dashboard', href: '/dashboard', icon: Home },
   { name: 'Build Planner', href: '/build-planner', icon: Calculator },
+  { name: 'Learn', href: '/learn', icon: GraduationCap },
   { name: 'Journal', href: '/journal', icon: BookOpen },
   { name: 'Environment', href: '/environment', icon: Thermometer },
   { name: 'Nutrients', href: '/nutrients', icon: Droplets },
