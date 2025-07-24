@@ -10,6 +10,7 @@ import Environment from "./pages/Environment";
 import Nutrients from "./pages/Nutrients";
 import Strains from "./pages/Strains";
 import Settings from "./pages/Settings";
+import BuildPlanner from "./pages/BuildPlanner";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/nutrients" element={<Nutrients />} />
           <Route path="/strains" element={<Strains />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/build-planner" element={<BuildPlanner />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -2,6 +2,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Calculator, Zap, DollarSign, Clock } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const BuildPlannerPreview = () => {
   const sampleBuild = {
@@ -62,9 +63,11 @@ const BuildPlannerPreview = () => {
       </div>
 
       <div className="space-y-3">
-        <Button variant="outline" className="w-full" disabled>
-          <Calculator className="w-4 h-4 mr-2" />
-          Try Build Planner (Coming Soon)
+        <Button asChild className="w-full">
+          <Link to="/build-planner">
+            <Calculator className="w-4 h-4 mr-2" />
+            Try Build Planner (Beta)
+          </Link>
         </Button>
         <p className="text-xs text-center text-muted-foreground">
           Full configurator launches with early access

@@ -3,6 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { ArrowRight, Zap, Brain, Shield, Gauge, Users, BookOpen, Bell, Wrench, Calculator } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import heroImage from '@/assets/grow-hero.jpg';
 import BuildPlannerPreview from '@/components/build-planner/BuildPlannerPreview';
 
