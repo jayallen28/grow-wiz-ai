@@ -194,9 +194,6 @@ const BuildSummary = ({ selectedComponents, totalCost, totalPower, onRemoveCompo
             <DollarSign className="w-4 h-4 mr-2" />
             Save Build Configuration
           </Button>
-          <Button variant="outline" className="w-full" disabled={allComponents.length === 0}>
-            Share Build
-          </Button>
         </div>
       </CardContent>
     </Card>

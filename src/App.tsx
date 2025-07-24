@@ -24,12 +24,12 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/build-planner" element={<BuildPlanner />} />
           <Route path="/journal" element={<Journal />} />
           <Route path="/environment" element={<Environment />} />
           <Route path="/nutrients" element={<Nutrients />} />
           <Route path="/strains" element={<Strains />} />
           <Route path="/settings" element={<Settings />} />
-          <Route path="/build-planner" element={<BuildPlanner />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

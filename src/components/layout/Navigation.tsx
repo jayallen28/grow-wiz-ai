@@ -8,13 +8,15 @@ import {
   Sprout, 
   Settings,
   Menu,
-  X
+  X,
+  Calculator
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 const navigationItems = [
-  { name: 'Dashboard', href: '/', icon: Home },
+  { name: 'Dashboard', href: '/dashboard', icon: Home },
+  { name: 'Build Planner', href: '/build-planner', icon: Calculator },
   { name: 'Journal', href: '/journal', icon: BookOpen },
   { name: 'Environment', href: '/environment', icon: Thermometer },
   { name: 'Nutrients', href: '/nutrients', icon: Droplets },
