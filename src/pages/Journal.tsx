@@ -1,9 +1,13 @@
+import { useState } from 'react';
 import { Navigation } from '@/components/layout/Navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Camera, Plus, Calendar } from 'lucide-react';
+import { AddJournalEntryModal } from '@/components/modals/AddJournalEntryModal';
 
 const Journal = () => {
+  const [showAddEntryModal, setShowAddEntryModal] = useState(false);
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -26,7 +30,7 @@ const Journal = () => {
                     <Calendar className="h-5 w-5" />
                     Recent Entries
                   </span>
-                  <Button variant="cannabis" size="sm">
+                  <Button variant="cannabis" size="sm" onClick={() => setShowAddEntryModal(true)}>
                     <Plus className="h-4 w-4 mr-2" />
                     Add Entry
                   </Button>
@@ -88,6 +92,11 @@ const Journal = () => {
           </div>
         </div>
       </main>
+      
+      <AddJournalEntryModal 
+        open={showAddEntryModal} 
+        onOpenChange={setShowAddEntryModal} 
+      />
     </div>
   );
 };

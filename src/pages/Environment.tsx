@@ -1,10 +1,14 @@
+import { useState } from 'react';
 import { Navigation } from '@/components/layout/Navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MetricCard } from '@/components/dashboard/MetricCard';
 import { Thermometer, Droplets, Wind, Sun, Activity, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { EnvironmentSettingsModal } from '@/components/modals/EnvironmentSettingsModal';
 
 const Environment = () => {
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -18,7 +22,7 @@ const Environment = () => {
               Monitor and control your grow environment
             </p>
           </div>
-          <Button variant="outline">
+          <Button variant="outline" onClick={() => setShowSettingsModal(true)}>
             <Settings className="h-4 w-4 mr-2" />
             Settings
           </Button>
@@ -118,7 +122,7 @@ const Environment = () => {
                   <span className="text-sm">Humidity Target</span>
                   <span className="text-sm font-medium">60-65%</span>
                 </div>
-                <Button variant="outline" className="w-full">
+                <Button variant="outline" className="w-full" onClick={() => setShowSettingsModal(true)}>
                   Adjust Settings
                 </Button>
               </CardContent>
@@ -137,7 +141,7 @@ const Environment = () => {
                   <span className="text-sm">Status</span>
                   <span className="text-sm font-medium text-success">Active</span>
                 </div>
-                <Button variant="outline" className="w-full">
+                <Button variant="outline" className="w-full" onClick={() => setShowSettingsModal(true)}>
                   Configure CO₂
                 </Button>
               </CardContent>
@@ -156,7 +160,7 @@ const Environment = () => {
                   <span className="text-sm">Next Change</span>
                   <span className="text-sm font-medium">6:00 PM</span>
                 </div>
-                <Button variant="outline" className="w-full">
+                <Button variant="outline" className="w-full" onClick={() => setShowSettingsModal(true)}>
                   Edit Schedule
                 </Button>
               </CardContent>
@@ -164,6 +168,11 @@ const Environment = () => {
           </div>
         </div>
       </main>
+      
+      <EnvironmentSettingsModal 
+        open={showSettingsModal} 
+        onOpenChange={setShowSettingsModal} 
+      />
     </div>
   );
 };

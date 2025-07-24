@@ -1,10 +1,14 @@
+import { useState } from 'react';
 import { Navigation } from '@/components/layout/Navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Sprout, Clock, TrendingUp } from 'lucide-react';
+import { AddStrainModal } from '@/components/modals/AddStrainModal';
 
 const Strains = () => {
+  const [showAddStrainModal, setShowAddStrainModal] = useState(false);
+  
   const mockStrains = [
     {
       id: '1',
@@ -74,7 +78,7 @@ const Strains = () => {
               Manage your cannabis strain collection and grow data
             </p>
           </div>
-          <Button variant="cannabis">
+          <Button variant="cannabis" onClick={() => setShowAddStrainModal(true)}>
             <Plus className="h-4 w-4 mr-2" />
             Add Strain
           </Button>
@@ -197,6 +201,11 @@ const Strains = () => {
           </Card>
         </div>
       </main>
+      
+      <AddStrainModal 
+        open={showAddStrainModal} 
+        onOpenChange={setShowAddStrainModal} 
+      />
     </div>
   );
 };

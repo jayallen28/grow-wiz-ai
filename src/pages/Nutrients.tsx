@@ -1,10 +1,14 @@
+import { useState } from 'react';
 import { Navigation } from '@/components/layout/Navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MetricCard } from '@/components/dashboard/MetricCard';
 import { Button } from '@/components/ui/button';
 import { Beaker, Droplets, Activity, Plus, Calendar } from 'lucide-react';
+import { FeedingLogModal } from '@/components/modals/FeedingLogModal';
 
 const Nutrients = () => {
+  const [showFeedingLogModal, setShowFeedingLogModal] = useState(false);
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -18,7 +22,7 @@ const Nutrients = () => {
               Track pH, nutrients, and feeding schedules
             </p>
           </div>
-          <Button variant="cannabis">
+          <Button variant="cannabis" onClick={() => setShowFeedingLogModal(true)}>
             <Plus className="h-4 w-4 mr-2" />
             Log Feeding
           </Button>
@@ -215,6 +219,11 @@ const Nutrients = () => {
           </div>
         </div>
       </main>
+      
+      <FeedingLogModal 
+        open={showFeedingLogModal} 
+        onOpenChange={setShowFeedingLogModal} 
+      />
     </div>
   );
 };
