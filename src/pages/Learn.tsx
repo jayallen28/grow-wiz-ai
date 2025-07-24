@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import ArticleView from '@/components/learn/ArticleView';
 
 const categories = [
   {
@@ -88,6 +89,7 @@ const allArticles = categories.flatMap(cat =>
 export default function Learn() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedArticle, setSelectedArticle] = useState<string | null>(null);
 
   const filteredArticles = allArticles.filter(article => {
     const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -104,6 +106,17 @@ export default function Learn() {
       default: return 'bg-muted';
     }
   };
+
+  if (selectedArticle) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <ArticleView onBack={() => setSelectedArticle(null)} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -216,7 +229,11 @@ export default function Learn() {
             
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {filteredArticles.map((article, idx) => (
-                <Card key={idx} className="cursor-pointer hover:shadow-elevated transition-shadow">
+                <Card 
+                  key={idx} 
+                  className="cursor-pointer hover:shadow-elevated transition-shadow"
+                  onClick={() => setSelectedArticle(article.title)}
+                >
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between gap-2">
                       <CardTitle className="text-base leading-snug">{article.title}</CardTitle>
@@ -251,7 +268,11 @@ export default function Learn() {
         {selectedCategory !== 'all' && !searchQuery && (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {categories.find(cat => cat.id === selectedCategory)?.articles.map((article, idx) => (
-              <Card key={idx} className="cursor-pointer hover:shadow-elevated transition-shadow">
+              <Card 
+                key={idx} 
+                className="cursor-pointer hover:shadow-elevated transition-shadow"
+                onClick={() => setSelectedArticle(article.title)}
+              >
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base leading-snug">{article.title}</CardTitle>
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
