@@ -13,6 +13,12 @@ import Settings from "./pages/Settings";
 import BuildPlanner from "./pages/BuildPlanner";
 import Learn from "./pages/Learn";
 import NotFound from "./pages/NotFound";
+import AdminLayout from "./components/admin/AdminLayout";
+import AdminDashboard from "./components/admin/AdminDashboard";
+import AdminArticles from "./pages/admin/AdminArticles";
+import AdminComponents from "./pages/admin/AdminComponents";
+import AdminUserContent from "./pages/admin/AdminUserContent";
+import AdminAnalytics from "./pages/admin/AdminAnalytics";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +38,16 @@ const App = () => (
           <Route path="/nutrients" element={<Nutrients />} />
           <Route path="/strains" element={<Strains />} />
           <Route path="/settings" element={<Settings />} />
+          
+          {/* Admin Routes */}
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<AdminDashboard />} />
+            <Route path="articles" element={<AdminArticles />} />
+            <Route path="components" element={<AdminComponents />} />
+            <Route path="user-content" element={<AdminUserContent />} />
+            <Route path="analytics" element={<AdminAnalytics />} />
+          </Route>
+          
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
