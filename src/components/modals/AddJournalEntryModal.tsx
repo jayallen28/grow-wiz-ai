@@ -20,39 +20,31 @@ export const AddJournalEntryModal = ({ open, onOpenChange }: AddJournalEntryModa
   const [newTag, setNewTag] = useState('');
   const { toast } = useToast();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
+    
     if (!title || !description) {
-      toast({ title: "Missing Information", description: "Please fill in both title and description.", variant: "destructive" });
+      toast({
+        title: "Missing Information",
+        description: "Please fill in both title and description.",
+        variant: "destructive",
+      });
       return;
     }
 
-    const journalEntry = {
-      title,
-      description,
-      tags,
-      createdAt: new Date().toISOString(), // optional, can be handled by backend too
-      // userId: currentUserId, // if you're tracking users, inject this
-    };
+    // Here you would submit the entry
+    toast({
+      title: "Entry Added",
+      description: "Your journal entry has been saved successfully.",
+    });
 
-    try {
-      const res = await fetch('/api/journal', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(journalEntry),
-      });
-
-      if (!res.ok) throw new Error('Failed to save');
-
-      toast({ title: "Entry Added", description: "Saved successfully." });
-      setTitle(''); setDescription(''); setTags([]); setNewTag('');
-      onOpenChange(false);
-    } catch (err) {
-      toast({ title: "Error", description: "Could not save entry.", variant: "destructive" });
-    }
+    // Reset form and close modal
+    setTitle('');
+    setDescription('');
+    setTags([]);
+    setNewTag('');
+    onOpenChange(false);
   };
-
 
   const addTag = () => {
     if (newTag && !tags.includes(newTag)) {
@@ -71,7 +63,7 @@ export const AddJournalEntryModal = ({ open, onOpenChange }: AddJournalEntryModa
         <DialogHeader>
           <DialogTitle>Add Journal Entry</DialogTitle>
         </DialogHeader>
-
+        
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="title">Entry Title</Label>
@@ -112,8 +104,8 @@ export const AddJournalEntryModal = ({ open, onOpenChange }: AddJournalEntryModa
               {tags.map((tag) => (
                 <Badge key={tag} variant="secondary" className="gap-1">
                   {tag}
-                  <X
-                    className="h-3 w-3 cursor-pointer"
+                  <X 
+                    className="h-3 w-3 cursor-pointer" 
                     onClick={() => removeTag(tag)}
                   />
                 </Badge>

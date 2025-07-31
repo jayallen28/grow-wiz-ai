@@ -1,35 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Navigation } from '@/components/layout/Navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Camera, Plus, Calendar } from 'lucide-react';
 import { AddJournalEntryModal } from '@/components/modals/AddJournalEntryModal';
 
-interface JournalEntry {
-  _id: string;
-  title: string;
-  content: string;
-  date: string;
-  tags?: string[];
-}
-
 const Journal = () => {
   const [showAddEntryModal, setShowAddEntryModal] = useState(false);
-  const [entries, setEntries] = useState<JournalEntry[]>([]);
-
-  useEffect(() => {
-    const fetchEntries = async () => {
-      try {
-        const res = await fetch('/api/journal');
-        const data = await res.json();
-        setEntries(data.entries);
-      } catch (error) {
-        console.error('Error fetching journal entries:', error);
-      }
-    };
-
-    fetchEntries();
-  }, []);
 
   return (
     <div className="min-h-screen bg-background">
@@ -61,35 +38,29 @@ const Journal = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {entries.length > 0 ? (
-                    entries.map((entry) => (
-                      <div key={entry._id} className="p-4 border border-border rounded-lg">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="font-medium">{entry.title}</span>
-                          <span className="text-sm text-muted-foreground">
-                            {new Date(entry.date).toLocaleDateString()}
-                          </span>
-                        </div>
-                        <p className="text-sm text-muted-foreground mb-3">
-                          {entry.content}
-                        </p>
-                        {entry.tags?.length > 0 && (
-                          <div className="flex gap-2">
-                            {entry.tags.map((tag, idx) => (
-                              <span key={idx} className="text-xs bg-primary/20 text-primary px-2 py-1 rounded">
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <Camera className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                      <p>No journal entries yet...</p>
+                  <div className="p-4 border border-border rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium">Day 21 - Flowering Stage</span>
+                      <span className="text-sm text-muted-foreground">Today</span>
                     </div>
-                  )}
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Fed with bloom nutrients. Plants showing nice bud development. 
+                      Defoliated lower fan leaves to improve airflow.
+                    </p>
+                    <div className="flex gap-2">
+                      <span className="text-xs bg-primary/20 text-primary px-2 py-1 rounded">
+                        Fed
+                      </span>
+                      <span className="text-xs bg-accent/20 text-accent-foreground px-2 py-1 rounded">
+                        Defoliated
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Camera className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>More journal entries coming soon...</p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -121,10 +92,10 @@ const Journal = () => {
           </div>
         </div>
       </main>
-
-      <AddJournalEntryModal
-        open={showAddEntryModal}
-        onOpenChange={setShowAddEntryModal}
+      
+      <AddJournalEntryModal 
+        open={showAddEntryModal} 
+        onOpenChange={setShowAddEntryModal} 
       />
     </div>
   );
