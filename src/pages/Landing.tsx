@@ -29,8 +29,12 @@ const Landing = () => {
               <a href="#community" className="text-muted-foreground hover:text-foreground transition-colors">Community</a>
             </div>
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" className="text-muted-foreground">Sign In</Button>
-              <Button variant="glow">Get Started</Button>
+              <Button variant="ghost" className="text-muted-foreground" asChild>
+                <Link to="/auth">Sign In</Link>
+              </Button>
+              <Button variant="glow" asChild>
+                <Link to="/auth">Get Started</Link>
+              </Button>
             </div>
           </div>
         </div>
