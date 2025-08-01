@@ -6,47 +6,20 @@ import { QuickActions } from './QuickActions';
 import BuildPlannerCard from './BuildPlannerCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Alert, GrowCycle } from '@/types/grow';
+import { DatabaseGrowCycle } from '@/hooks/useGrowCycles';
+import { DatabaseEnvironmentData } from '@/hooks/useEnvironmentData';
+import { useAlerts } from '@/hooks/useAlerts';
 
 interface DashboardProps {
-  currentGrow?: GrowCycle;
+  currentGrow?: DatabaseGrowCycle | null;
+  latestEnvironmentData?: DatabaseEnvironmentData | null;
 }
 
-export function Dashboard({ currentGrow }: DashboardProps) {
-  // Mock data - in real app this would come from props/context
-  const [alerts, setAlerts] = useState<Alert[]>([
-    {
-      id: '1',
-      type: 'warning',
-      title: 'pH Drift Detected',
-      message: 'pH has risen to 6.8, consider adjusting',
-      timestamp: new Date(),
-      isRead: false,
-      action: 'Adjust pH'
-    },
-    {
-      id: '2',
-      type: 'info',
-      title: 'Feeding Schedule',
-      message: 'Next feeding due in 2 hours',
-      timestamp: new Date(),
-      isRead: false,
-    },
-  ]);
-
-  const mockEnvironmentData = {
-    temperature: 76,
-    humidity: 65,
-    pH: 6.8,
-    tds: 1200,
-    waterTemp: 68,
-    co2: 1200,
-  };
+export function Dashboard({ currentGrow, latestEnvironmentData }: DashboardProps) {
+  const { alerts, markAsRead } = useAlerts();
 
   const handleDismissAlert = (alertId: string) => {
-    setAlerts(alerts.map(alert => 
-      alert.id === alertId ? { ...alert, isRead: true } : alert
-    ));
+    markAsRead(alertId).catch(console.error);
   };
 
   const handleQuickAction = (action: string) => {
@@ -69,6 +42,16 @@ export function Dashboard({ currentGrow }: DashboardProps) {
     }
   };
 
+  // Default environment data if none available
+  const environmentData = latestEnvironmentData || {
+    temperature: 72,
+    humidity: 60,
+    ph: 6.5,
+    tds: 800,
+    water_temp: 65,
+    co2: 1000,
+  };
+
   return (
     <div className="space-y-6">
       {/* Current Grow Info */}
@@ -77,9 +60,9 @@ export function Dashboard({ currentGrow }: DashboardProps) {
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               <span>Current Grow: {currentGrow.name}</span>
-              <Badge className={getStageColor(currentGrow.currentStage.stage)}>
-                {currentGrow.currentStage.stage.charAt(0).toUpperCase() + 
-                 currentGrow.currentStage.stage.slice(1)}
+              <Badge className={getStageColor(currentGrow.current_stage)}>
+                {currentGrow.current_stage.charAt(0).toUpperCase() + 
+                 currentGrow.current_stage.slice(1)}
               </Badge>
             </CardTitle>
           </CardHeader>
@@ -87,15 +70,15 @@ export function Dashboard({ currentGrow }: DashboardProps) {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
               <div>
                 <p className="text-muted-foreground">Strain</p>
-                <p className="font-medium">{currentGrow.strain.name}</p>
+                <p className="font-medium">{currentGrow.strains?.name || 'No strain selected'}</p>
               </div>
               <div>
                 <p className="text-muted-foreground">Day in Stage</p>
-                <p className="font-medium">{currentGrow.currentStage.currentDay}</p>
+                <p className="font-medium">{currentGrow.current_day}</p>
               </div>
               <div>
                 <p className="text-muted-foreground">Plant Count</p>
-                <p className="font-medium">{currentGrow.plantCount}</p>
+                <p className="font-medium">{currentGrow.plant_count}</p>
               </div>
               <div>
                 <p className="text-muted-foreground">Medium</p>
@@ -110,7 +93,7 @@ export function Dashboard({ currentGrow }: DashboardProps) {
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <MetricCard
           title="Temperature"
-          value={mockEnvironmentData.temperature}
+          value={environmentData.temperature}
           unit="°F"
           icon={<Thermometer className="h-4 w-4" />}
           status="normal"
@@ -119,7 +102,7 @@ export function Dashboard({ currentGrow }: DashboardProps) {
         />
         <MetricCard
           title="Humidity"
-          value={mockEnvironmentData.humidity}
+          value={environmentData.humidity}
           unit="%"
           icon={<Droplets className="h-4 w-4" />}
           status="normal"
@@ -128,15 +111,15 @@ export function Dashboard({ currentGrow }: DashboardProps) {
         />
         <MetricCard
           title="pH Level"
-          value={mockEnvironmentData.pH}
+          value={environmentData.ph || 6.5}
           icon={<Beaker className="h-4 w-4" />}
-          status="warning"
-          trend="up"
-          trendValue="+0.3"
+          status="normal"
+          trend="stable"
+          trendValue="±0.1"
         />
         <MetricCard
           title="TDS"
-          value={mockEnvironmentData.tds}
+          value={environmentData.tds || 800}
           unit="ppm"
           icon={<Activity className="h-4 w-4" />}
           status="good"
@@ -145,7 +128,7 @@ export function Dashboard({ currentGrow }: DashboardProps) {
         />
         <MetricCard
           title="Water Temp"
-          value={mockEnvironmentData.waterTemp}
+          value={environmentData.water_temp || 65}
           unit="°F"
           icon={<Thermometer className="h-4 w-4" />}
           status="good"
@@ -154,7 +137,7 @@ export function Dashboard({ currentGrow }: DashboardProps) {
         />
         <MetricCard
           title="CO₂"
-          value={mockEnvironmentData.co2}
+          value={environmentData.co2 || 1000}
           unit="ppm"
           icon={<Wind className="h-4 w-4" />}
           status="normal"
@@ -167,7 +150,14 @@ export function Dashboard({ currentGrow }: DashboardProps) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Alerts Panel */}
         <div className="lg:col-span-2">
-          <AlertPanel alerts={alerts} onDismiss={handleDismissAlert} />
+          <AlertPanel 
+            alerts={alerts.map(alert => ({
+              ...alert,
+              isRead: alert.is_read,
+              timestamp: new Date(alert.timestamp)
+            }))} 
+            onDismiss={handleDismissAlert} 
+          />
         </div>
 
         {/* Right Panel */}

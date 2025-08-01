@@ -1,42 +1,40 @@
 import { Navigation } from '@/components/layout/Navigation';
 import { Dashboard as DashboardComponent } from '@/components/dashboard/Dashboard';
-import { GrowCycle, StrainProfile, GrowStage } from '@/types/grow';
-
-// Mock data for development
-const mockStrain: StrainProfile = {
-  id: '1',
-  name: 'Northern Lights',
-  type: 'indica',
-  floweringTime: 8,
-  expectedYield: '400-500g/m²',
-  thcContent: '18-22%',
-  cbdContent: '<1%',
-  growthPattern: 'compact',
-  notes: 'Classic indica strain, great for beginners',
-  createdAt: new Date(),
-};
-
-const mockGrowStage: GrowStage = {
-  stage: 'flowering',
-  startDate: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000), // 21 days ago
-  expectedDuration: 56, // 8 weeks
-  currentDay: 21,
-};
-
-const mockGrowCycle: GrowCycle = {
-  id: '1',
-  name: 'Northern Lights #1',
-  strain: mockStrain,
-  startDate: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000), // 90 days ago
-  currentStage: mockGrowStage,
-  plantCount: 4,
-  medium: 'dwc',
-  logs: [],
-  status: 'active',
-  notes: 'First DWC grow, learning the ropes',
-};
+import { useAuth } from '@/hooks/useAuth';
+import { useGrowCycles } from '@/hooks/useGrowCycles';
+import { useEnvironmentData } from '@/hooks/useEnvironmentData';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
+  const { user, loading: authLoading } = useAuth();
+  const { currentGrow, loading: growLoading } = useGrowCycles();
+  const { latestReading } = useEnvironmentData(currentGrow?.id);
+  const navigate = useNavigate();
+
+  if (authLoading || growLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-2 text-muted-foreground">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <h1 className="text-2xl font-bold">Welcome to GrowTracker</h1>
+          <p className="text-muted-foreground">Please sign in to access your dashboard</p>
+          <Button onClick={() => navigate('/auth')}>Sign In</Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -50,7 +48,10 @@ const Dashboard = () => {
           </p>
         </div>
         
-        <DashboardComponent currentGrow={mockGrowCycle} />
+        <DashboardComponent 
+          currentGrow={currentGrow} 
+          latestEnvironmentData={latestReading}
+        />
       </main>
     </div>
   );
