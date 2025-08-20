@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { 
-  Home, 
-  BookOpen, 
-  Thermometer, 
-  Droplets, 
-  Sprout, 
+import {
+  Home,
+  BookOpen,
+  Thermometer,
+  Droplets,
+  Sprout,
   Settings,
   Menu,
   X,
@@ -20,10 +20,10 @@ const navigationItems = [
   { name: 'Build Planner', href: '/build-planner', icon: Calculator },
   { name: 'Learn', href: '/learn', icon: GraduationCap },
   { name: 'Journal', href: '/journal', icon: BookOpen },
-  { name: 'Environment', href: '/environment', icon: Thermometer },
-  { name: 'Nutrients', href: '/nutrients', icon: Droplets },
+  // { name: 'Environment', href: '/environment', icon: Thermometer },
+  // { name: 'Nutrients', href: '/nutrients', icon: Droplets },
   { name: 'Strains', href: '/strains', icon: Sprout },
-  { name: 'Settings', href: '/settings', icon: Settings },
+  // { name: 'Settings', href: '/settings', icon: Settings },
 ];
 
 export function Navigation() {
@@ -40,16 +40,16 @@ export function Navigation() {
               <div className="flex-shrink-0 flex items-center">
                 <Sprout className="h-8 w-8 text-primary mr-3" />
                 <span className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                  GrowTracker
+                  Optimal Grows
                 </span>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-4">
               {navigationItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.href;
-                
+
                 return (
                   <Link
                     key={item.name}
@@ -78,10 +78,10 @@ export function Navigation() {
             <div className="flex items-center">
               <Sprout className="h-6 w-6 text-primary mr-2" />
               <span className="text-lg font-bold bg-gradient-primary bg-clip-text text-transparent">
-                GrowTracker
+                Optimal Grows
               </span>
             </div>
-            
+
             <Button
               variant="ghost"
               size="icon"
@@ -103,7 +103,7 @@ export function Navigation() {
               {navigationItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.href;
-                
+
                 return (
                   <Link
                     key={item.name}
