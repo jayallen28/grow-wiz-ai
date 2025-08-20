@@ -1,206 +1,151 @@
-import { useState } from 'react';
-import { Thermometer, Droplets, Beaker, Wind, Sun, Activity } from 'lucide-react';
-import { MetricCard } from './MetricCard';
 import { AlertPanel } from './AlertPanel';
 import { QuickActions } from './QuickActions';
 import BuildPlannerCard from './BuildPlannerCard';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { DatabaseGrowCycle } from '@/hooks/useGrowCycles';
-import { DatabaseEnvironmentData } from '@/hooks/useEnvironmentData';
-import { useAlerts } from '@/hooks/useAlerts';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { CalendarDays, Sprout, BookOpen, Calculator, Plus } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface DashboardProps {
-  currentGrow?: DatabaseGrowCycle | null;
-  latestEnvironmentData?: DatabaseEnvironmentData | null;
+  currentGrow: DatabaseGrowCycle | null;
+  alerts: any[];
+  environmentData: any;
 }
 
-export function Dashboard({ currentGrow, latestEnvironmentData }: DashboardProps) {
-  const { alerts, markAsRead } = useAlerts();
-
-  const handleDismissAlert = (alertId: string) => {
-    markAsRead(alertId).catch(console.error);
-  };
-
-  const handleQuickAction = (action: string) => {
-    console.log('Quick action:', action);
-    // Handle quick actions - navigate to appropriate page or open modal
-  };
-
-  const getStageColor = (stage: string) => {
-    switch (stage) {
-      case 'seedling':
-        return 'bg-green-500/20 text-green-400 border-green-500/30';
-      case 'vegetative':
-        return 'bg-primary/20 text-primary border-primary/30';
-      case 'flowering':
-        return 'bg-purple-500/20 text-purple-400 border-purple-500/30';
-      case 'harvest':
-        return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
-      default:
-        return 'bg-muted/20 text-muted-foreground border-muted/30';
-    }
-  };
-
-  // Default environment data if none available
-  const environmentData = latestEnvironmentData || {
-    temperature: 72,
-    humidity: 60,
-    ph: 6.5,
-    tds: 800,
-    water_temp: 65,
-    co2: 1000,
-  };
-
+export function Dashboard({ currentGrow, alerts, environmentData }: DashboardProps) {
   return (
-    <div className="space-y-6">
-      {/* Current Grow Info */}
-      {currentGrow && (
-        <Card className="bg-gradient-card border-primary/20">
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold mb-2 bg-gradient-primary bg-clip-text text-transparent">
+          Welcome Back
+        </h1>
+        <p className="text-xl text-muted-foreground">
+          Manage your grows, plan builds, and track your journey
+        </p>
+      </div>
+
+      {alerts.length > 0 && (
+        <div className="mb-8">
+          <AlertPanel alerts={alerts} onDismiss={() => {}} />
+        </div>
+      )}
+
+      {/* Current Grow Overview */}
+      {currentGrow ? (
+        <Card className="mb-8">
           <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span>Current Grow: {currentGrow.name}</span>
-              <Badge className={getStageColor(currentGrow.current_stage)}>
-                {currentGrow.current_stage.charAt(0).toUpperCase() + 
-                 currentGrow.current_stage.slice(1)}
-              </Badge>
+            <CardTitle className="flex items-center gap-2">
+              <Sprout className="h-5 w-5 text-primary" />
+              Current Grow: {currentGrow.name}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-              <div>
-                <p className="text-muted-foreground">Strain</p>
-                <p className="font-medium">{currentGrow.strains?.name || 'No strain selected'}</p>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="text-center">
+                <p className="text-2xl font-bold text-primary">Day {currentGrow.current_day || 1}</p>
+                <p className="text-sm text-muted-foreground">Current Day</p>
               </div>
-              <div>
-                <p className="text-muted-foreground">Day in Stage</p>
-                <p className="font-medium">{currentGrow.current_day}</p>
+              <div className="text-center">
+                <p className="text-2xl font-bold">{currentGrow.current_stage}</p>
+                <p className="text-sm text-muted-foreground">Growth Stage</p>
               </div>
-              <div>
-                <p className="text-muted-foreground">Plant Count</p>
-                <p className="font-medium">{currentGrow.plant_count}</p>
+              <div className="text-center">
+                <p className="text-2xl font-bold">{currentGrow.plant_count}</p>
+                <p className="text-sm text-muted-foreground">Plants</p>
               </div>
-              <div>
-                <p className="text-muted-foreground">Medium</p>
-                <p className="font-medium">{currentGrow.medium.toUpperCase()}</p>
+              <div className="flex items-center justify-center">
+                <Button asChild>
+                  <Link to="/journal">View Journal</Link>
+                </Button>
               </div>
             </div>
           </CardContent>
         </Card>
+      ) : (
+        <Card className="mb-8 border-dashed">
+          <CardContent className="py-8 text-center">
+            <Sprout className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No Active Grows</h3>
+            <p className="text-muted-foreground mb-4">Start tracking your first grow cycle</p>
+            <Button asChild>
+              <Link to="/journal">
+                <Plus className="h-4 w-4 mr-2" />
+                Start New Grow
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
       )}
 
-      {/* Environmental Metrics */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        <MetricCard
-          title="Temperature"
-          value={environmentData.temperature}
-          unit="°F"
-          icon={<Thermometer className="h-4 w-4" />}
-          status="normal"
-          trend="stable"
-          trendValue="±1°F"
-        />
-        <MetricCard
-          title="Humidity"
-          value={environmentData.humidity}
-          unit="%"
-          icon={<Droplets className="h-4 w-4" />}
-          status="normal"
-          trend="stable"
-          trendValue="±2%"
-        />
-        <MetricCard
-          title="pH Level"
-          value={environmentData.ph || 6.5}
-          icon={<Beaker className="h-4 w-4" />}
-          status="normal"
-          trend="stable"
-          trendValue="±0.1"
-        />
-        <MetricCard
-          title="TDS"
-          value={environmentData.tds || 800}
-          unit="ppm"
-          icon={<Activity className="h-4 w-4" />}
-          status="good"
-          trend="stable"
-          trendValue="±50 ppm"
-        />
-        <MetricCard
-          title="Water Temp"
-          value={environmentData.water_temp || 65}
-          unit="°F"
-          icon={<Thermometer className="h-4 w-4" />}
-          status="good"
-          trend="stable"
-          trendValue="±2°F"
-        />
-        <MetricCard
-          title="CO₂"
-          value={environmentData.co2 || 1000}
-          unit="ppm"
-          icon={<Wind className="h-4 w-4" />}
-          status="normal"
-          trend="stable"
-          trendValue="±100 ppm"
-        />
+      {/* Quick Access Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+          <Link to="/build-planner">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Calculator className="h-5 w-5 text-primary" />
+                Build Planner
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground mb-4">
+                Design your perfect grow setup with our component builder
+              </p>
+              <Button variant="outline" className="w-full">
+                Plan Build →
+              </Button>
+            </CardContent>
+          </Link>
+        </Card>
+
+        <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+          <Link to="/journal">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <BookOpen className="h-5 w-5 text-primary" />
+                Grow Journal
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground mb-4">
+                Track your grow cycles and log daily observations
+              </p>
+              <Button variant="outline" className="w-full">
+                Open Journal →
+              </Button>
+            </CardContent>
+          </Link>
+        </Card>
+
+        <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+          <Link to="/strains">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Sprout className="h-5 w-5 text-primary" />
+                Strain Library
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground mb-4">
+                Manage your strain collection and track genetics
+              </p>
+              <Button variant="outline" className="w-full">
+                View Strains →
+              </Button>
+            </CardContent>
+          </Link>
+        </Card>
       </div>
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Alerts Panel */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
-          <AlertPanel 
-            alerts={alerts.map(alert => ({
-              ...alert,
-              isRead: alert.is_read,
-              timestamp: new Date(alert.timestamp)
-            }))} 
-            onDismiss={handleDismissAlert} 
-          />
-        </div>
-
-        {/* Right Panel */}
-        <div className="space-y-6">
-          <QuickActions onAction={handleQuickAction} />
           <BuildPlannerCard />
         </div>
+        <div>
+          <QuickActions onAction={() => {}} />
+        </div>
       </div>
-
-      {/* Recent Activity */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Activity className="h-5 w-5" />
-            Recent Activity
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between py-2 border-b border-border/50">
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 bg-primary rounded-full"></div>
-                <span className="text-sm">Fed plants with bloom nutrients</span>
-              </div>
-              <span className="text-xs text-muted-foreground">2 hours ago</span>
-            </div>
-            <div className="flex items-center justify-between py-2 border-b border-border/50">
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 bg-warning rounded-full"></div>
-                <span className="text-sm">pH adjusted from 7.2 to 6.5</span>
-              </div>
-              <span className="text-xs text-muted-foreground">4 hours ago</span>
-            </div>
-            <div className="flex items-center justify-between py-2">
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 bg-success rounded-full"></div>
-                <span className="text-sm">Defoliation completed</span>
-              </div>
-              <span className="text-xs text-muted-foreground">1 day ago</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }

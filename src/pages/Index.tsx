@@ -49,8 +49,9 @@ const Dashboard = () => {
         </div>
         
         <DashboardComponent 
-          currentGrow={currentGrow} 
-          latestEnvironmentData={latestReading}
+          currentGrow={currentGrow}
+          alerts={[]}
+          environmentData={latestReading}
         />
       </main>
     </div>

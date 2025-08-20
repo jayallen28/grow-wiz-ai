@@ -11,9 +11,11 @@ import { useToast } from '@/hooks/use-toast';
 interface AddJournalEntryModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  growCycleId?: string;
+  onEntryAdded?: () => void;
 }
 
-export const AddJournalEntryModal = ({ open, onOpenChange }: AddJournalEntryModalProps) => {
+export const AddJournalEntryModal = ({ open, onOpenChange, growCycleId, onEntryAdded }: AddJournalEntryModalProps) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [tags, setTags] = useState<string[]>([]);

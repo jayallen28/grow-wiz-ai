@@ -14,6 +14,8 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { ProfileDropdown } from './ProfileDropdown';
+import { useAuth } from '@/hooks/useAuth';
 
 const navigationItems = [
   { name: 'Dashboard', href: '/dashboard', icon: Home },
@@ -29,6 +31,7 @@ const navigationItems = [
 export function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const { user } = useAuth();
 
   return (
     <>
@@ -66,6 +69,8 @@ export function Navigation() {
                   </Link>
                 );
               })}
+              
+              {user && <ProfileDropdown />}
             </div>
           </div>
         </div>
