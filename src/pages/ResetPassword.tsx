@@ -19,10 +19,11 @@ const ResetPassword = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check if we have the necessary tokens from the URL
-    const accessToken = searchParams.get('access_token');
-    const refreshToken = searchParams.get('refresh_token');
-    const type = searchParams.get('type');
+    // Parse tokens from hash fragment (not search params)
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const accessToken = hashParams.get('access_token');
+    const refreshToken = hashParams.get('refresh_token');
+    const type = hashParams.get('type');
     
     if (!accessToken || !refreshToken || type !== 'recovery') {
       toast({
@@ -39,7 +40,7 @@ const ResetPassword = () => {
       access_token: accessToken,
       refresh_token: refreshToken,
     });
-  }, [searchParams, navigate, toast]);
+  }, [navigate, toast]);
 
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
