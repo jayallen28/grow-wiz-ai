@@ -22,8 +22,9 @@ const ResetPassword = () => {
     // Check if we have the necessary tokens from the URL
     const accessToken = searchParams.get('access_token');
     const refreshToken = searchParams.get('refresh_token');
+    const type = searchParams.get('type');
     
-    if (!accessToken || !refreshToken) {
+    if (!accessToken || !refreshToken || type !== 'recovery') {
       toast({
         title: "Invalid Reset Link",
         description: "This password reset link is invalid or has expired.",
