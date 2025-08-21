@@ -10,6 +10,7 @@ export const availableComponents: BuildComponent[] = [
     price: 149,
     powerConsumption: 0,
     description: 'Professional-grade grow tent with thick canvas, reflective interior, and multiple ports for ventilation.',
+    imageUrl: 'https://images.unsplash.com/photo-1586281380614-a1c857dc6b67?w=400&h=300&fit=crop',
     affiliateUrl: 'https://example.com/affiliate/ac-infinity-4x4',
     specifications: {
       'Dimensions': '48" x 48" x 80"',
@@ -30,6 +31,7 @@ export const availableComponents: BuildComponent[] = [
     price: 69,
     powerConsumption: 0,
     description: 'Compact grow tent perfect for small spaces or starting plants.',
+    imageUrl: 'https://images.unsplash.com/photo-1586281380614-a1c857dc6b67?w=400&h=300&fit=crop',
     affiliateUrl: 'https://example.com/affiliate/vivosun-2x2',
     specifications: {
       'Dimensions': '24" x 24" x 48"',
@@ -52,6 +54,7 @@ export const availableComponents: BuildComponent[] = [
     price: 299,
     powerConsumption: 300,
     description: 'Full spectrum LED grow light with Samsung LM301B diodes. Perfect for 4x4 grow tents.',
+    imageUrl: 'https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?w=400&h=300&fit=crop',
     affiliateUrl: 'https://example.com/affiliate/mars-hydro-tsw2000',
     specifications: {
       'Coverage': '4x4 ft',
@@ -72,6 +75,7 @@ export const availableComponents: BuildComponent[] = [
     price: 259,
     powerConsumption: 200,
     description: 'Samsung LM301B diodes with meanwell driver. Energy efficient and powerful.',
+    imageUrl: 'https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?w=400&h=300&fit=crop',
     affiliateUrl: 'https://example.com/affiliate/spider-farmer-sf2000',
     specifications: {
       'Coverage': '3x3 ft',
@@ -94,6 +98,7 @@ export const availableComponents: BuildComponent[] = [
     price: 149,
     powerConsumption: 45,
     description: 'Quiet inline duct fan with speed controller and temperature/humidity controls.',
+    imageUrl: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=300&fit=crop',
     affiliateUrl: 'https://example.com/affiliate/ac-infinity-t6',
     specifications: {
       'Airflow': '402 CFM',
@@ -114,6 +119,7 @@ export const availableComponents: BuildComponent[] = [
     price: 39,
     powerConsumption: 25,
     description: 'Budget-friendly inline fan perfect for smaller setups.',
+    imageUrl: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=300&fit=crop',
     affiliateUrl: 'https://example.com/affiliate/vivosun-4inch',
     specifications: {
       'Airflow': '190 CFM',
@@ -136,6 +142,7 @@ export const availableComponents: BuildComponent[] = [
     price: 89,
     powerConsumption: 0,
     description: 'Premium carbon filter with virgin activated carbon for maximum odor control.',
+    imageUrl: 'https://images.unsplash.com/photo-1604709177225-055f99402ea3?w=400&h=300&fit=crop',
     affiliateUrl: 'https://example.com/affiliate/phresh-6x24',
     specifications: {
       'Diameter': '6 inch',
@@ -158,6 +165,7 @@ export const availableComponents: BuildComponent[] = [
     price: 49,
     powerConsumption: 0,
     description: 'Professional pH meter with automatic temperature compensation and calibration.',
+    imageUrl: 'https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?w=400&h=300&fit=crop',
     affiliateUrl: 'https://example.com/affiliate/apera-ph20',
     specifications: {
       'Accuracy': '±0.1 pH',
@@ -180,6 +188,7 @@ export const availableComponents: BuildComponent[] = [
     price: 39,
     powerConsumption: 0,
     description: 'Complete 3-part nutrient system for all stages of plant growth.',
+    imageUrl: 'https://images.unsplash.com/photo-1601758003122-53c40e686a19?w=400&h=300&fit=crop',
     affiliateUrl: 'https://example.com/affiliate/gh-flora-trio',
     specifications: {
       'Type': '3-Part System',
@@ -202,6 +211,7 @@ export const availableComponents: BuildComponent[] = [
     price: 19,
     powerConsumption: 0,
     description: 'Programmable timer with dual outlets for lights and other equipment.',
+    imageUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop',
     affiliateUrl: 'https://example.com/affiliate/bn-link-timer',
     specifications: {
       'Outlets': '2',
@@ -224,6 +234,7 @@ export const availableComponents: BuildComponent[] = [
     price: 349,
     powerConsumption: 260,
     description: 'High-end quantum board with Samsung LM301H diodes and efficient design.',
+    imageUrl: 'https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?w=400&h=300&fit=crop',
     affiliateUrl: 'https://example.com/affiliate/hlg-260w',
     specifications: {
       'Coverage': '3x3 ft',
@@ -245,6 +256,7 @@ export const availableComponents: BuildComponent[] = [
     price: 399,
     powerConsumption: 0,
     description: 'Premium grow tent with height extension capability and superior build quality.',
+    imageUrl: 'https://images.unsplash.com/photo-1586281380614-a1c857dc6b67?w=400&h=300&fit=crop',
     affiliateUrl: 'https://example.com/affiliate/gorilla-4x4',
     specifications: {
       'Dimensions': '48" x 48" x 84"',

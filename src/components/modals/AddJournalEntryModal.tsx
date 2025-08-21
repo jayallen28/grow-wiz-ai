@@ -5,8 +5,11 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Camera, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useGrowLogs } from '@/hooks/useGrowLogs';
+import { useGrowCycles } from '@/hooks/useGrowCycles';
 
 interface AddJournalEntryModalProps {
   open: boolean;
@@ -16,47 +19,79 @@ interface AddJournalEntryModalProps {
 }
 
 export const AddJournalEntryModal = ({ open, onOpenChange, growCycleId, onEntryAdded }: AddJournalEntryModalProps) => {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [tags, setTags] = useState<string[]>([]);
-  const [newTag, setNewTag] = useState('');
+  const [notes, setNotes] = useState('');
+  const [growStage, setGrowStage] = useState('');
+  const [dayInStage, setDayInStage] = useState('1');
+  const [actions, setActions] = useState<string[]>([]);
+  const [newAction, setNewAction] = useState('');
+  const [loading, setLoading] = useState(false);
+  
   const { toast } = useToast();
+  const { addGrowLog } = useGrowLogs();
+  const { growCycles, currentGrow } = useGrowCycles();
+  
+  const selectedGrow = growCycles.find(g => g.id === growCycleId) || currentGrow;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!title || !description) {
+    if (!notes || !growStage || !growCycleId) {
       toast({
         title: "Missing Information",
-        description: "Please fill in both title and description.",
+        description: "Please fill in all required fields.",
         variant: "destructive",
       });
       return;
     }
 
-    // Here you would submit the entry
-    toast({
-      title: "Entry Added",
-      description: "Your journal entry has been saved successfully.",
-    });
+    setLoading(true);
 
-    // Reset form and close modal
-    setTitle('');
-    setDescription('');
-    setTags([]);
-    setNewTag('');
-    onOpenChange(false);
-  };
+    try {
+      await addGrowLog({
+        grow_cycle_id: growCycleId,
+        date: new Date().toISOString().split('T')[0],
+        grow_stage: growStage as 'seedling' | 'vegetative' | 'flowering' | 'harvest' | 'drying' | 'curing',
+        day_in_stage: parseInt(dayInStage),
+        notes,
+        actions: actions.length > 0 ? actions : null,
+        issues: null,
+        photos: null,
+        height: null,
+      });
 
-  const addTag = () => {
-    if (newTag && !tags.includes(newTag)) {
-      setTags([...tags, newTag]);
-      setNewTag('');
+      toast({
+        title: "Entry Added",
+        description: "Your journal entry has been saved successfully.",
+      });
+
+      // Reset form and close modal
+      setNotes('');
+      setGrowStage('');
+      setDayInStage('1');
+      setActions([]);
+      setNewAction('');
+      onOpenChange(false);
+      onEntryAdded?.();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save journal entry.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
-  const removeTag = (tagToRemove: string) => {
-    setTags(tags.filter(tag => tag !== tagToRemove));
+  const addAction = () => {
+    if (newAction && !actions.includes(newAction)) {
+      setActions([...actions, newAction]);
+      setNewAction('');
+    }
+  };
+
+  const removeAction = (actionToRemove: string) => {
+    setActions(actions.filter(action => action !== actionToRemove));
   };
 
   return (
@@ -67,48 +102,75 @@ export const AddJournalEntryModal = ({ open, onOpenChange, growCycleId, onEntryA
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="title">Entry Title</Label>
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g., Day 21 - Flowering Stage"
-            />
+          {selectedGrow && (
+            <div className="p-3 bg-muted/50 rounded-lg">
+              <p className="text-sm font-medium">Adding entry to: {selectedGrow.name}</p>
+              <p className="text-xs text-muted-foreground">Day {selectedGrow.current_day} - {selectedGrow.current_stage}</p>
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="growStage">Growth Stage *</Label>
+              <Select value={growStage} onValueChange={setGrowStage}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select stage" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="seedling">Seedling</SelectItem>
+                  <SelectItem value="vegetative">Vegetative</SelectItem>
+                  <SelectItem value="flowering">Flowering</SelectItem>
+                  <SelectItem value="harvest">Harvest</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="dayInStage">Day in Stage *</Label>
+              <Input
+                id="dayInStage"
+                type="number"
+                min="1"
+                value={dayInStage}
+                onChange={(e) => setDayInStage(e.target.value)}
+                placeholder="e.g., 1"
+              />
+            </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="notes">Notes *</Label>
             <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              id="notes"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
               placeholder="Describe what happened today..."
               rows={4}
+              required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="tags">Tags</Label>
+            <Label htmlFor="actions">Actions Taken</Label>
             <div className="flex gap-2">
               <Input
-                id="tags"
-                value={newTag}
-                onChange={(e) => setNewTag(e.target.value)}
-                placeholder="Add a tag..."
-                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+                id="actions"
+                value={newAction}
+                onChange={(e) => setNewAction(e.target.value)}
+                placeholder="e.g., Watered, Fed nutrients..."
+                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addAction())}
               />
-              <Button type="button" onClick={addTag} variant="outline" size="sm">
+              <Button type="button" onClick={addAction} variant="outline" size="sm">
                 Add
               </Button>
             </div>
             <div className="flex flex-wrap gap-2">
-              {tags.map((tag) => (
-                <Badge key={tag} variant="secondary" className="gap-1">
-                  {tag}
+              {actions.map((action, index) => (
+                <Badge key={index} variant="secondary" className="gap-1">
+                  {action}
                   <X 
                     className="h-3 w-3 cursor-pointer" 
-                    onClick={() => removeTag(tag)}
+                    onClick={() => removeAction(action)}
                   />
                 </Badge>
               ))}
@@ -121,11 +183,11 @@ export const AddJournalEntryModal = ({ open, onOpenChange, growCycleId, onEntryA
           </Button>
 
           <div className="flex gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="flex-1">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="flex-1" disabled={loading}>
               Cancel
             </Button>
-            <Button type="submit" className="flex-1">
-              Save Entry
+            <Button type="submit" className="flex-1" disabled={loading}>
+              {loading ? 'Saving...' : 'Save Entry'}
             </Button>
           </div>
         </form>

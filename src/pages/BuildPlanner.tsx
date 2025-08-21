@@ -5,12 +5,15 @@ import { Calculator, Save, Share } from 'lucide-react';
 import { Navigation } from '@/components/layout/Navigation';
 import ComponentSelector from '@/components/build-planner/ComponentSelector';
 import BuildSummary from '@/components/build-planner/BuildSummary';
+import CategoryNavigation from '@/components/build-planner/CategoryNavigation';
 import { BuildComponent, BuildConfiguration, ComponentCategory, BuildComponentWithQuantity } from '@/types/buildPlanner';
+import { availableComponents } from '@/data/buildComponents';
 
 const BuildPlanner = () => {
   const [selectedComponents, setSelectedComponents] = useState<{
     [category in ComponentCategory]?: BuildComponentWithQuantity[];
   }>({});
+  const [selectedCategory, setSelectedCategory] = useState<ComponentCategory>('grow-tent');
 
   const addComponent = (component: BuildComponent) => {
     setSelectedComponents(prev => ({
@@ -52,6 +55,16 @@ const BuildPlanner = () => {
     return getAllComponents().reduce((sum, component) => sum + (component.powerConsumption * component.quantity), 0);
   };
 
+  const getComponentCounts = () => {
+    const counts: Partial<Record<ComponentCategory, number>> = {};
+    
+    availableComponents.forEach(component => {
+      counts[component.category] = (counts[component.category] || 0) + 1;
+    });
+    
+    return counts;
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -84,12 +97,24 @@ const BuildPlanner = () => {
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-4 gap-6">
+          {/* Category Navigation */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-24">
+              <CategoryNavigation
+                selectedCategory={selectedCategory}
+                onCategoryChange={setSelectedCategory}
+                componentCounts={getComponentCounts()}
+              />
+            </div>
+          </div>
+
           {/* Component Selection */}
           <div className="lg:col-span-2">
             <ComponentSelector 
               onAddComponent={addComponent}
               selectedComponents={selectedComponents}
+              selectedCategory={selectedCategory}
             />
           </div>
 
