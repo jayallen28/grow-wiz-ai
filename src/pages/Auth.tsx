@@ -118,11 +118,10 @@ const Auth = () => {
     }
 
     try {
-      // Use production URL when on localhost, otherwise use current domain
-      const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-      const redirectUrl = isLocalhost 
-        ? 'https://lovable.dev/projects/hownsbjemcleccfpnwtx/reset-password'
-        : `${window.location.origin}/reset-password`;
+      // Force the correct production URL regardless of localhost
+      const redirectUrl = 'https://lovable.dev/projects/hownsbjemcleccfpnwtx/reset-password';
+      
+      console.log('Forcing redirect URL to:', redirectUrl);
         
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: redirectUrl
