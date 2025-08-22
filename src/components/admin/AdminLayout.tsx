@@ -17,9 +17,9 @@ import { cn } from "@/lib/utils";
 
 const adminNavItems = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
+  { name: "Users", href: "/admin/users", icon: Users },
   { name: "Articles", href: "/admin/articles", icon: FileText },
   { name: "Build Components", href: "/admin/components", icon: Wrench },
-  { name: "User Content", href: "/admin/user-content", icon: Users },
   { name: "Strains", href: "/admin/strains", icon: Leaf },
   { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
   { name: "Settings", href: "/admin/settings", icon: Settings },

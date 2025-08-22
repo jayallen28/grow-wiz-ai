@@ -20,8 +20,10 @@ import AdminLayout from "./components/admin/AdminLayout";
 import AdminDashboard from "./components/admin/AdminDashboard";
 import AdminArticles from "./pages/admin/AdminArticles";
 import AdminComponents from "./pages/admin/AdminComponents";
-import AdminUserContent from "./pages/admin/AdminUserContent";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminStrains from "./pages/admin/AdminStrains";
 import AdminAnalytics from "./pages/admin/AdminAnalytics";
+import AdminProtectedRoute from "./components/admin/AdminProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -46,11 +48,12 @@ const App = () => (
           <Route path="/settings" element={<Settings />} />
           
           {/* Admin Routes */}
-          <Route path="/admin" element={<AdminLayout />}>
+          <Route path="/admin" element={<AdminProtectedRoute><AdminLayout /></AdminProtectedRoute>}>
             <Route index element={<AdminDashboard />} />
+            <Route path="users" element={<AdminUsers />} />
             <Route path="articles" element={<AdminArticles />} />
             <Route path="components" element={<AdminComponents />} />
-            <Route path="user-content" element={<AdminUserContent />} />
+            <Route path="strains" element={<AdminStrains />} />
             <Route path="analytics" element={<AdminAnalytics />} />
           </Route>
           
