@@ -1,16 +1,59 @@
+import { useState, useEffect } from 'react';
 import { ArrowLeft, Clock, BookOpen, Lightbulb, AlertTriangle, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useArticles } from '@/hooks/useArticles';
 
 interface ArticleViewProps {
+  articleId?: string;
   onBack: () => void;
 }
 
-export default function ArticleView({ onBack }: ArticleViewProps) {
-  return (
+export default function ArticleView({ articleId, onBack }: ArticleViewProps) {
+  const { getArticleById, updateViewCount } = useArticles();
+  const [article, setArticle] = useState<any>(null);
+  const [loading, setLoading] = useState(!!articleId);
+
+  useEffect(() => {
+    if (articleId) {
+      loadArticle();
+    }
+  }, [articleId]);
+
+  const loadArticle = async () => {
+    if (!articleId) return;
+    
+    try {
+      setLoading(true);
+      const articleData = await getArticleById(articleId);
+      setArticle(articleData);
+      // Update view count
+      await updateViewCount(articleId);
+    } catch (error) {
+      console.error('Error loading article:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="max-w-4xl mx-auto">
+        <Button variant="ghost" onClick={onBack} className="mb-4">
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Articles
+        </Button>
+        <div className="text-center py-8">Loading article...</div>
+      </div>
+    );
+  }
+
+  // If no articleId provided or article not found, show sample article
+  if (!articleId || !article) {
+    return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-6">
         <Button 
@@ -24,23 +67,22 @@ export default function ArticleView({ onBack }: ArticleViewProps) {
         
         <div className="space-y-4">
           <div className="flex flex-wrap gap-2">
-            <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/20">
-              Beginner
+            <Badge variant="outline" className="bg-blue-500/10 text-blue-600 border-blue-500/20">
+              Sample Content
             </Badge>
-            <Badge variant="secondary">Setup</Badge>
-            <Badge variant="secondary">Basics</Badge>
+            <Badge variant="secondary">Demo</Badge>
           </div>
           
-          <h1 className="text-4xl font-bold">Getting Started: Your First Grow</h1>
+          <h1 className="text-4xl font-bold">Sample Article: Getting Started</h1>
           
           <div className="flex items-center gap-4 text-muted-foreground">
             <div className="flex items-center gap-1">
               <Clock className="h-4 w-4" />
-              <span>8 min read</span>
+              <span>Sample content</span>
             </div>
             <div className="flex items-center gap-1">
               <BookOpen className="h-4 w-4" />
-              <span>Growing Basics</span>
+              <span>Demo</span>
             </div>
           </div>
         </div>
@@ -313,6 +355,78 @@ export default function ArticleView({ onBack }: ArticleViewProps) {
             </Card>
           </div>
         </section>
+      </div>
+    </div>
+    );
+  }
+
+  // Render real article from Supabase
+  return (
+    <div className="max-w-4xl mx-auto">
+      <div className="mb-6">
+        <Button 
+          variant="ghost" 
+          onClick={onBack}
+          className="mb-4"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Articles
+        </Button>
+        
+        <div className="space-y-4">
+          <div className="flex flex-wrap gap-2">
+            <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/20">
+              Published
+            </Badge>
+            {(article.tags || []).slice(0, 3).map((tag: string, index: number) => (
+              <Badge key={index} variant="secondary">{tag}</Badge>
+            ))}
+          </div>
+          
+          <h1 className="text-4xl font-bold">{article.title}</h1>
+          
+          <div className="flex items-center gap-4 text-muted-foreground">
+            <div className="flex items-center gap-1">
+              <Clock className="h-4 w-4" />
+              <span>{article.reading_time || 5} min read</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <BookOpen className="h-4 w-4" />
+              <span>{article.category}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {article.featured_image_url && (
+        <div className="mb-8">
+          <img 
+            src={article.featured_image_url} 
+            alt={article.title}
+            className="w-full h-64 object-cover rounded-lg"
+          />
+        </div>
+      )}
+
+      {article.excerpt && (
+        <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-6 rounded-lg mb-8">
+          <h2 className="text-xl font-semibold mb-3 flex items-center gap-2">
+            <Lightbulb className="h-5 w-5 text-primary" />
+            Article Summary
+          </h2>
+          <p className="text-sm">{article.excerpt}</p>
+        </div>
+      )}
+
+      <div className="prose prose-lg max-w-none">
+        <div dangerouslySetInnerHTML={{ __html: article.content.replace(/\n/g, '<br/>') }} />
+      </div>
+
+      <Separator className="my-8" />
+
+      <div className="text-center text-muted-foreground">
+        <p>Published on {new Date(article.published_at || article.created_at).toLocaleDateString()}</p>
+        <p>{article.view_count || 0} views</p>
       </div>
     </div>
   );

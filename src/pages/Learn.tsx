@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Search, Book, Lightbulb, Shield, Droplets, Thermometer, Bug, Calendar, AlertTriangle } from 'lucide-react';
 import { Navigation } from '@/components/layout/Navigation';
 import { Input } from '@/components/ui/input';
@@ -6,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ArticleView from '@/components/learn/ArticleView';
+import { useArticles } from '@/hooks/useArticles';
 
 const categories = [
   {
@@ -87,16 +89,45 @@ const allArticles = categories.flatMap(cat =>
 );
 
 export default function Learn() {
+  const navigate = useNavigate();
+  const { id: articleId } = useParams();
+  const { articles, loading, fetchPublishedArticles } = useArticles();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [selectedArticle, setSelectedArticle] = useState<string | null>(null);
+  const [publishedArticles, setPublishedArticles] = useState<any[]>([]);
 
+  useEffect(() => {
+    const loadPublishedArticles = async () => {
+      try {
+        const published = await fetchPublishedArticles();
+        setPublishedArticles(published);
+      } catch (error) {
+        console.error('Failed to load published articles:', error);
+      }
+    };
+    loadPublishedArticles();
+  }, [fetchPublishedArticles]);
+
+  // Filter real articles from Supabase
+  const filteredRealArticles = publishedArticles.filter(article => {
+    const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         (article.tags || []).some((tag: string) => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+    const matchesCategory = selectedCategory === 'all' || article.category === getCategoryNameById(selectedCategory);
+    return matchesSearch && matchesCategory;
+  });
+
+  // Filter mock articles for categories
   const filteredArticles = allArticles.filter(article => {
     const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          article.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesCategory = selectedCategory === 'all' || article.categoryId === selectedCategory;
     return matchesSearch && matchesCategory;
   });
+
+  const getCategoryNameById = (id: string) => {
+    const category = categories.find(cat => cat.id === id);
+    return category ? category.name : '';
+  };
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
@@ -107,12 +138,12 @@ export default function Learn() {
     }
   };
 
-  if (selectedArticle) {
+  if (articleId) {
     return (
       <div className="min-h-screen bg-background">
         <Navigation />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <ArticleView onBack={() => setSelectedArticle(null)} />
+          <ArticleView articleId={articleId} onBack={() => navigate('/learn')} />
         </div>
       </div>
     );
@@ -218,12 +249,63 @@ export default function Learn() {
           ))}
         </Tabs>
 
-        {/* Articles Grid */}
+        {/* Real Articles from Supabase */}
+        {(selectedCategory === 'all' || searchQuery) && filteredRealArticles.length > 0 && (
+          <div className="space-y-4 mb-8">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">
+                {searchQuery ? `Articles (${filteredRealArticles.length})` : 'Published Articles'}
+              </h2>
+            </div>
+            
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {filteredRealArticles.map((article) => (
+                <Card 
+                  key={article.id} 
+                  className="cursor-pointer hover:shadow-elevated transition-shadow"
+                  onClick={() => navigate(`/learn/article/${article.id}`)}
+                >
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <CardTitle className="text-base leading-snug">{article.title}</CardTitle>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <span>{article.reading_time || 5} min</span>
+                      <span>•</span>
+                      <span>{article.category}</span>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/20">
+                        Published
+                      </Badge>
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {(article.tags || []).slice(0, 3).map((tag: string, tagIdx: number) => (
+                        <Badge key={tagIdx} variant="secondary" className="text-xs">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                    {article.excerpt && (
+                      <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
+                        {article.excerpt}
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Sample Articles */}
         {(selectedCategory === 'all' || searchQuery) && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">
-                {searchQuery ? `Search Results (${filteredArticles.length})` : 'All Articles'}
+                Sample Content {searchQuery ? `(${filteredArticles.length})` : '(Coming Soon)'}
               </h2>
             </div>
             
@@ -231,8 +313,8 @@ export default function Learn() {
               {filteredArticles.map((article, idx) => (
                 <Card 
                   key={idx} 
-                  className="cursor-pointer hover:shadow-elevated transition-shadow"
-                  onClick={() => setSelectedArticle(article.title)}
+                  className="cursor-pointer hover:shadow-elevated transition-shadow opacity-75"
+                  onClick={() => navigate('/learn/sample')}
                 >
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between gap-2">
@@ -248,6 +330,9 @@ export default function Learn() {
                     <div className="flex items-center gap-2 mb-3">
                       <Badge variant="outline" className={getDifficultyColor(article.difficulty)}>
                         {article.difficulty}
+                      </Badge>
+                      <Badge variant="outline" className="text-xs">
+                        Sample
                       </Badge>
                     </div>
                     <div className="flex flex-wrap gap-1">
@@ -271,7 +356,7 @@ export default function Learn() {
               <Card 
                 key={idx} 
                 className="cursor-pointer hover:shadow-elevated transition-shadow"
-                onClick={() => setSelectedArticle(article.title)}
+                onClick={() => navigate('/learn/sample')}
               >
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base leading-snug">{article.title}</CardTitle>

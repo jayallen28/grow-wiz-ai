@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,70 +21,51 @@ import {
   Filter,
   Download
 } from "lucide-react";
+import { useArticles } from "@/hooks/useArticles";
+import { useToast } from "@/hooks/use-toast";
 
 export default function AdminArticles() {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { articles, loading, deleteArticle, refetch } = useArticles();
   const [searchTerm, setSearchTerm] = useState("");
 
-  const articles = [
-    {
-      id: 1,
-      title: "Complete LED Growing Guide",
-      category: "Equipment",
-      status: "published",
-      author: "Admin",
-      views: 1234,
-      lastModified: "2024-01-15",
-      featured: true
-    },
-    {
-      id: 2,
-      title: "Understanding Plant Nutrients",
-      category: "Nutrition",
-      status: "draft",
-      author: "Expert",
-      views: 567,
-      lastModified: "2024-01-14",
-      featured: false
-    },
-    {
-      id: 3,
-      title: "Setting Up Your First Grow",
-      category: "Beginner",
-      status: "published",
-      author: "Admin",
-      views: 2341,
-      lastModified: "2024-01-12",
-      featured: true
-    },
-    {
-      id: 4,
-      title: "Advanced Training Techniques",
-      category: "Advanced",
-      status: "review",
-      author: "Guest",
-      views: 891,
-      lastModified: "2024-01-10",
-      featured: false
-    }
-  ];
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'published':
-        return <Badge variant="default">Published</Badge>;
-      case 'draft':
-        return <Badge variant="secondary">Draft</Badge>;
-      case 'review':
-        return <Badge variant="outline">Under Review</Badge>;
-      default:
-        return <Badge variant="outline">{status}</Badge>;
-    }
+  const getStatusBadge = (isPublished: boolean) => {
+    return isPublished 
+      ? <Badge variant="default">Published</Badge>
+      : <Badge variant="secondary">Draft</Badge>;
   };
 
   const filteredArticles = articles.filter(article =>
     article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     article.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm("Are you sure you want to delete this article?")) {
+      try {
+        await deleteArticle(id);
+        toast({
+          title: "Success",
+          description: "Article deleted successfully",
+        });
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to delete article",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const publishedCount = articles.filter(a => a.is_published).length;
+  const draftCount = articles.filter(a => !a.is_published).length;
+  const totalViews = articles.reduce((sum, a) => sum + (a.view_count || 0), 0);
 
   return (
     <div className="space-y-6">
@@ -92,7 +74,10 @@ export default function AdminArticles() {
           <h1 className="text-3xl font-bold">Articles Management</h1>
           <p className="text-muted-foreground">Manage educational content and guides</p>
         </div>
-        <Button className="gap-2">
+        <Button 
+          className="gap-2"
+          onClick={() => navigate("/admin/articles/new")}
+        >
           <Plus className="h-4 w-4" />
           Create Article
         </Button>
@@ -105,8 +90,8 @@ export default function AdminArticles() {
             <CardTitle className="text-sm font-medium">Total Articles</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">24</div>
-            <p className="text-xs text-muted-foreground">+2 this month</p>
+            <div className="text-2xl font-bold">{articles.length}</div>
+            <p className="text-xs text-muted-foreground">Total articles</p>
           </CardContent>
         </Card>
         <Card>
@@ -114,8 +99,8 @@ export default function AdminArticles() {
             <CardTitle className="text-sm font-medium">Published</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">18</div>
-            <p className="text-xs text-muted-foreground">75% of total</p>
+            <div className="text-2xl font-bold">{publishedCount}</div>
+            <p className="text-xs text-muted-foreground">{articles.length > 0 ? Math.round((publishedCount / articles.length) * 100) : 0}% of total</p>
           </CardContent>
         </Card>
         <Card>
@@ -123,7 +108,7 @@ export default function AdminArticles() {
             <CardTitle className="text-sm font-medium">Drafts</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">4</div>
+            <div className="text-2xl font-bold">{draftCount}</div>
             <p className="text-xs text-muted-foreground">Need completion</p>
           </CardContent>
         </Card>
@@ -132,8 +117,8 @@ export default function AdminArticles() {
             <CardTitle className="text-sm font-medium">Total Views</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">45.2K</div>
-            <p className="text-xs text-muted-foreground">+12% this week</p>
+            <div className="text-2xl font-bold">{totalViews.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground">All time views</p>
           </CardContent>
         </Card>
       </div>
@@ -181,36 +166,59 @@ export default function AdminArticles() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredArticles.map((article) => (
-                <TableRow key={article.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">{article.title}</span>
-                      {article.featured && (
-                        <Badge variant="outline" className="text-xs">Featured</Badge>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>{article.category}</TableCell>
-                  <TableCell>{getStatusBadge(article.status)}</TableCell>
-                  <TableCell>{article.author}</TableCell>
-                  <TableCell>{article.views.toLocaleString()}</TableCell>
-                  <TableCell>{article.lastModified}</TableCell>
-                  <TableCell>
-                    <div className="flex gap-1">
-                      <Button variant="ghost" size="sm">
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-8">
+                    Loading articles...
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : filteredArticles.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-8">
+                    No articles found
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredArticles.map((article) => (
+                  <TableRow key={article.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">{article.title}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>{article.category}</TableCell>
+                    <TableCell>{getStatusBadge(article.is_published)}</TableCell>
+                    <TableCell>Admin</TableCell>
+                    <TableCell>{article.view_count?.toLocaleString() || 0}</TableCell>
+                    <TableCell>{new Date(article.updated_at).toLocaleDateString()}</TableCell>
+                    <TableCell>
+                      <div className="flex gap-1">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => navigate(`/learn/article/${article.id}`)}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => navigate(`/admin/articles/edit/${article.id}`)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleDelete(article.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </CardContent>

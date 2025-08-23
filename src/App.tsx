@@ -19,6 +19,7 @@ import NotFound from "./pages/NotFound";
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminDashboard from "./components/admin/AdminDashboard";
 import AdminArticles from "./pages/admin/AdminArticles";
+import AdminArticleEditor from "./pages/admin/AdminArticleEditor";
 import AdminComponents from "./pages/admin/AdminComponents";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminStrains from "./pages/admin/AdminStrains";
@@ -41,6 +42,8 @@ const App = () => (
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/build-planner" element={<BuildPlanner />} />
           <Route path="/learn" element={<Learn />} />
+          <Route path="/learn/article/:id" element={<Learn />} />
+          <Route path="/learn/sample" element={<Learn />} />
           <Route path="/journal" element={<Journal />} />
           <Route path="/environment" element={<Environment />} />
           <Route path="/nutrients" element={<Nutrients />} />
@@ -52,6 +55,8 @@ const App = () => (
             <Route index element={<AdminDashboard />} />
             <Route path="users" element={<AdminUsers />} />
             <Route path="articles" element={<AdminArticles />} />
+            <Route path="articles/new" element={<AdminArticleEditor />} />
+            <Route path="articles/edit/:id" element={<AdminArticleEditor />} />
             <Route path="components" element={<AdminComponents />} />
             <Route path="strains" element={<AdminStrains />} />
             <Route path="analytics" element={<AdminAnalytics />} />
