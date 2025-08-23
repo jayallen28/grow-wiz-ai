@@ -1,16 +1,60 @@
+"use client";
+
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
-  FileText, 
-  Users, 
-  Wrench, 
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  FileText,
+  Users,
+  Wrench,
   TrendingUp,
   Activity,
-  AlertTriangle,
-  CheckCircle
+  CheckCircle,
+  ListChecks
 } from "lucide-react";
 
+import { ComponentCategory } from "@/types/buildPlanner";
+
+const allCategories: ComponentCategory[] = [
+  "grow-tent",
+  "led-light",
+  "ventilation",
+  "carbon-filter",
+  "nutrients",
+  "ph-meter",
+  "tds-meter",
+  "timer",
+  "thermometer",
+  "hygrometer",
+  "co2-controller",
+  "grow-medium",
+  "pots",
+  "ducting",
+  "oscillating-fan",
+  "dehumidifier",
+  "humidifier",
+  "arduino-kit",
+  "sensors",
+  "accessories",
+];
+
 export default function AdminDashboard() {
+  const [open, setOpen] = useState(false);
+  const [selectedCategories, setSelectedCategories] = useState<ComponentCategory[]>([
+    "grow-tent",
+    "led-light",
+    "ventilation",
+  ]);
+
+  const toggleCategory = (category: ComponentCategory) => {
+    setSelectedCategories((prev) =>
+      prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category]
+    );
+  };
+
   const stats = [
     {
       title: "Total Articles",
@@ -146,14 +190,44 @@ export default function AdminDashboard() {
               <h3 className="font-medium">Add Component</h3>
               <p className="text-sm text-muted-foreground">Expand build catalog</p>
             </div>
-            <div className="p-4 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors">
-              <TrendingUp className="h-8 w-8 text-primary mb-2" />
-              <h3 className="font-medium">View Analytics</h3>
-              <p className="text-sm text-muted-foreground">Check performance metrics</p>
+            <div
+              className="p-4 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
+              onClick={() => setOpen(true)}
+            >
+              <ListChecks className="h-8 w-8 text-primary mb-2" />
+              <h3 className="font-medium">Manage Categories</h3>
+              <p className="text-sm text-muted-foreground">Control visible build categories</p>
             </div>
           </div>
         </CardContent>
       </Card>
+
+      {/* Category Modal */}
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Manage Build Categories</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 max-h-[400px] overflow-y-auto p-2">
+            {allCategories.map((category) => (
+              <div key={category} className="flex items-center space-x-2">
+                <Checkbox
+                  checked={selectedCategories.includes(category)}
+                  onCheckedChange={() => toggleCategory(category)}
+                  id={category}
+                />
+                <label htmlFor={category} className="text-sm capitalize cursor-pointer">
+                  {category.replace("-", " ")}
+                </label>
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setOpen(false)}>Cancel</Button>
+            <Button onClick={() => setOpen(false)}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
