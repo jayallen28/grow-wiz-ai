@@ -1,12 +1,10 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Trash2, DollarSign, Zap, Calculator } from 'lucide-react';
-import { BuildComponent, ComponentCategory, PowerCostCalculation, BuildComponentWithQuantity } from '@/types/buildPlanner';
-import { useState } from 'react';
+import { ChevronUp, ChevronDown, Save, Zap } from 'lucide-react';
+import { BuildComponentWithQuantity, ComponentCategory } from '@/types/buildPlanner';
+import BuildCategory from './BuildCategory';
+import PowerCostCalculator from './PowerCostCalculator';
 
 interface BuildSummaryProps {
   selectedComponents: {
@@ -18,185 +16,145 @@ interface BuildSummaryProps {
   onUpdateQuantity: (componentId: string, category: ComponentCategory, quantity: number) => void;
 }
 
-const BuildSummary = ({ selectedComponents, totalCost, totalPower, onRemoveComponent, onUpdateQuantity }: BuildSummaryProps) => {
-  const [electricityRate, setElectricityRate] = useState(0.12); // Default to $0.12/kWh
-  const [hoursPerDay, setHoursPerDay] = useState(18); // Default to 18 hours for vegetative stage
+const BuildSummary = ({
+  selectedComponents,
+  totalCost,
+  totalPower,
+  onRemoveComponent,
+  onUpdateQuantity,
+}: BuildSummaryProps) => {
+  const [expanded, setExpanded] = useState(false);
+  const [showPowerCalc, setShowPowerCalc] = useState(false);
+  const [collapsedCategories, setCollapsedCategories] = useState<{ [key: string]: boolean }>({});
 
-  const allComponents = Object.entries(selectedComponents).flatMap(([category, components]) =>
-    components?.map(component => ({ ...component, category: category as ComponentCategory })) || []
-  );
+  const categories = Object.keys(selectedComponents) as ComponentCategory[];
 
-  const calculatePowerCost = (): PowerCostCalculation => {
-    const dailyConsumption = (totalPower * hoursPerDay) / 1000; // Convert to kWh
-    const monthlyConsumption = dailyConsumption * 30;
-    const dailyCost = dailyConsumption * electricityRate;
-    const monthlyCost = monthlyConsumption * electricityRate;
-    const annualCost = monthlyCost * 12;
-
-    return {
-      dailyConsumption,
-      monthlyConsumption,
-      dailyCost,
-      monthlyCost,
-      annualCost,
-      electricityRate
-    };
+  const toggleCategory = (category: ComponentCategory) => {
+    setCollapsedCategories((prev) => ({ ...prev, [category]: !prev[category] }));
   };
 
-  const powerCost = calculatePowerCost();
+  const totalComponents = categories.reduce(
+    (acc, cat) => acc + (selectedComponents[cat]?.length || 0),
+    0
+  );
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Calculator className="w-5 h-5" />
-          Build Summary
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Selected Components */}
-        <div>
-          <h4 className="font-semibold mb-3">Selected Components ({allComponents.length})</h4>
-          {allComponents.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-4">
-              No components selected yet
-            </p>
-          ) : (
-            <div className="space-y-2 max-h-60 overflow-y-auto">
-              {allComponents.map((component) => (
-                <div key={component.id} className="flex items-center justify-between p-2 bg-accent/20 rounded-lg">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">
-                      {component.name}
-                      {component.isCustom && <Badge variant="secondary" className="ml-2 text-xs">Custom</Badge>}
-                    </p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-xs text-primary font-semibold">
-                        ${component.price.toFixed(2)} {component.quantity > 1 && `x${component.quantity} = $${(component.price * component.quantity).toFixed(2)}`}
-                      </span>
-                      {component.powerConsumption > 0 && (
-                        <Badge variant="outline" className="text-xs">
-                          <Zap className="w-2 h-2 mr-1" />
-                          {component.powerConsumption}W{component.quantity > 1 && ` x${component.quantity}`}
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <div className="flex items-center">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => onUpdateQuantity(component.id, component.category, component.quantity - 1)}
-                        className="h-6 w-6 p-0"
-                      >
-                        -
-                      </Button>
-                      <span className="text-xs font-medium w-6 text-center">{component.quantity}</span>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => onUpdateQuantity(component.id, component.category, component.quantity + 1)}
-                        className="h-6 w-6 p-0"
-                      >
-                        +
-                      </Button>
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => onRemoveComponent(component.id, component.category)}
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
+    <div className="fixed bottom-0 left-0 w-full z-50">
+      {/* Expanded Section */}
+      {expanded && (
+        <div className="animate-in slide-in-from-bottom-2 max-h-[70vh] overflow-y-auto backdrop-blur-md bg-[#0B070D]/80 shadow-lg px-6 pt-4 pb-2 space-y-6">
+          {/* Expand/Collapse All Controls */}
+          {!showPowerCalc && (
+            <div className="flex justify-end gap-3">
+              <Button size="sm" variant="outline" onClick={() => setCollapsedCategories({})}>
+                <ChevronDown className="w-4 h-4" /> Expand All
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  const allCollapsed: { [key: string]: boolean } = {};
+                  categories.forEach((cat) => (allCollapsed[cat] = true));
+                  setCollapsedCategories(allCollapsed);
+                }}
+              >
+                <ChevronUp className="w-4 h-4" /> Collapse All
+              </Button>
             </div>
           )}
+
+          {/* Categories */}
+          {!showPowerCalc &&
+            categories.map((category) => {
+              const components = selectedComponents[category] || [];
+              if (components.length === 0) return null;
+              const collapsed = collapsedCategories[category];
+
+              return (
+                <BuildCategory
+                  key={category}
+                  category={category}
+                  components={components}
+                  collapsed={collapsed}
+                  toggleCategory={() => toggleCategory(category)}
+                  onRemoveComponent={onRemoveComponent}
+                  onUpdateQuantity={onUpdateQuantity}
+                />
+              );
+            })}
+
+          {/* Power Cost Calculator */}
+          {showPowerCalc && totalPower > 0 && (
+            <PowerCostCalculator
+              totalPower={totalPower}
+              productCount={totalComponents}
+              visible={showPowerCalc}
+              onClose={() => setShowPowerCalc(false)}
+            />
+          )}
         </div>
+      )}
 
-        <Separator />
-
-        {/* Cost Summary */}
-        <div>
-          <h4 className="font-semibold mb-3">Cost Summary</h4>
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <span className="text-sm">Equipment Total:</span>
-              <span className="font-semibold text-primary">${totalCost.toFixed(2)}</span>
+      {/* Collapsed / Bottom Bar (click anywhere to toggle) */}
+      <div
+        className="flex items-center justify-between bg-[#1A111F]/90 border-t shadow-lg px-4 py-3 text-lg font-bold relative cursor-pointer"
+        onClick={() => setExpanded(!expanded)}
+      >
+        {/* Left: Total (stacked labels) + Components pill */}
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-6 text-lg font-semibold">
+            <div className="flex flex-col items-start">
+              <span className="text-gray-400 text-xs">Total</span>
+              <span className="text-green-500">${totalCost.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-sm">Total Power:</span>
-              <span className="font-semibold">{totalPower}W</span>
+            <div className="flex flex-col items-start">
+              <span className="text-gray-400 text-xs">Power</span>
+              <span className="flex items-center text-yellow-400">
+                <Zap className="w-4 h-4 mr-1" /> {totalPower}W
+              </span>
             </div>
           </div>
+          <Badge variant="secondary" className="text-sm px-2 py-0.5">
+            {totalComponents} Components
+          </Badge>
         </div>
 
-        <Separator />
-
-        {/* Power Cost Calculator */}
-        <div>
-          <h4 className="font-semibold mb-3">Power Cost Calculator</h4>
-          <div className="space-y-3">
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label htmlFor="electricity-rate" className="text-xs">
-                  Electricity Rate ($/kWh)
-                </Label>
-                <Input
-                  id="electricity-rate"
-                  type="number"
-                  step="0.01"
-                  value={electricityRate}
-                  onChange={(e) => setElectricityRate(parseFloat(e.target.value) || 0)}
-                  className="h-8 text-sm"
-                />
-              </div>
-              <div>
-                <Label htmlFor="hours-per-day" className="text-xs">
-                  Hours/Day
-                </Label>
-                <Input
-                  id="hours-per-day"
-                  type="number"
-                  value={hoursPerDay}
-                  onChange={(e) => setHoursPerDay(parseInt(e.target.value) || 0)}
-                  className="h-8 text-sm"
-                />
-              </div>
-            </div>
-
-            {totalPower > 0 && (
-              <div className="space-y-2 p-3 bg-accent/10 rounded-lg">
-                <div className="flex justify-between text-sm">
-                  <span>Daily Cost:</span>
-                  <span className="font-semibold">${powerCost.dailyCost.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span>Monthly Cost:</span>
-                  <span className="font-semibold text-primary">${powerCost.monthlyCost.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span>Annual Cost:</span>
-                  <span className="font-semibold">${powerCost.annualCost.toFixed(2)}</span>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <Separator />
-
-        {/* Actions */}
-        <div className="space-y-2">
-          <Button className="w-full" disabled={allComponents.length === 0}>
-            <DollarSign className="w-4 h-4 mr-2" />
-            Save Build Configuration
+        {/* Right: Buttons (don’t toggle the bar when clicking these) */}
+        <div
+          className="flex items-center gap-3"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {totalPower > 0 && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="flex items-center gap-2"
+              onClick={() => setShowPowerCalc((prev) => !prev)}
+            >
+              <Zap className="w-4 h-4" /> Calculator
+            </Button>
+          )}
+          <Button
+            size="sm"
+            variant="default"
+            className="bg-green-600 text-white flex items-center gap-2"
+            onClick={() => alert('Save Build')}
+          >
+            <Save className="w-4 h-4" /> Save
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={(e) => {
+              e.stopPropagation();
+              setExpanded((prev) => !prev);
+            }}
+          >
+            {expanded ? <ChevronDown className="w-5 h-5" /> : <ChevronUp className="w-5 h-5" />}
           </Button>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 
