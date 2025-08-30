@@ -14,6 +14,8 @@ export interface DatabaseGrowLog {
   actions?: string[];
   issues?: string[];
   photos?: string[];
+  plant_id?: string;
+  applies_to_all?: boolean;
   created_at: string;
   updated_at: string;
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,9 +7,9 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Camera, X } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 import { useGrowLogs } from '@/hooks/useGrowLogs';
-import { useGrowCycles } from '@/hooks/useGrowCycles';
+import { usePlants } from '@/hooks/usePlants';
+import { toast } from 'sonner';
 
 interface AddJournalEntryModalProps {
   open: boolean;
@@ -19,73 +19,46 @@ interface AddJournalEntryModalProps {
 }
 
 export const AddJournalEntryModal = ({ open, onOpenChange, growCycleId, onEntryAdded }: AddJournalEntryModalProps) => {
+  const [date, setDate] = useState(new Date());
+  const [growStage, setGrowStage] = useState('vegetative');
+  const [dayInStage, setDayInStage] = useState(1);
   const [notes, setNotes] = useState('');
-  const [growStage, setGrowStage] = useState('');
-  const [dayInStage, setDayInStage] = useState('1');
   const [actions, setActions] = useState<string[]>([]);
+  const [issues, setIssues] = useState<string[]>([]);
   const [newAction, setNewAction] = useState('');
-  const [loading, setLoading] = useState(false);
-  
-  const { toast } = useToast();
+  const [newIssue, setNewIssue] = useState('');
+  const [height, setHeight] = useState('');
+  const [selectedPlantId, setSelectedPlantId] = useState<string>('all');
+  const [appliesToAll, setAppliesToAll] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const { addGrowLog } = useGrowLogs();
-  const { growCycles, currentGrow } = useGrowCycles();
-  
-  const selectedGrow = growCycles.find(g => g.id === growCycleId) || currentGrow;
+  const { plants } = usePlants(growCycleId);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!notes || !growStage || !growCycleId) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      await addGrowLog({
-        grow_cycle_id: growCycleId,
-        date: new Date().toISOString().split('T')[0],
-        grow_stage: growStage as 'seedling' | 'vegetative' | 'flowering' | 'harvest' | 'drying' | 'curing',
-        day_in_stage: parseInt(dayInStage),
-        notes,
-        actions: actions.length > 0 ? actions : null,
-        issues: null,
-        photos: null,
-        height: null,
-      });
-
-      toast({
-        title: "Entry Added",
-        description: "Your journal entry has been saved successfully.",
-      });
-
-      // Reset form and close modal
+  useEffect(() => {
+    if (open) {
+      setDate(new Date());
+      setGrowStage('vegetative');
+      setDayInStage(1);
       setNotes('');
-      setGrowStage('');
-      setDayInStage('1');
       setActions([]);
+      setIssues([]);
       setNewAction('');
-      onOpenChange(false);
-      onEntryAdded?.();
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to save journal entry.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
+      setNewIssue('');
+      setHeight('');
+      setSelectedPlantId('all');
+      setAppliesToAll(true);
+      setIsSubmitting(false);
     }
-  };
+  }, [open]);
+
+  useEffect(() => {
+    setAppliesToAll(selectedPlantId === 'all');
+  }, [selectedPlantId]);
 
   const addAction = () => {
-    if (newAction && !actions.includes(newAction)) {
-      setActions([...actions, newAction]);
+    if (newAction.trim() && !actions.includes(newAction.trim())) {
+      setActions([...actions, newAction.trim()]);
       setNewAction('');
     }
   };
@@ -94,70 +67,154 @@ export const AddJournalEntryModal = ({ open, onOpenChange, growCycleId, onEntryA
     setActions(actions.filter(action => action !== actionToRemove));
   };
 
+  const addIssue = () => {
+    if (newIssue.trim() && !issues.includes(newIssue.trim())) {
+      setIssues([...issues, newIssue.trim()]);
+      setNewIssue('');
+    }
+  };
+
+  const removeIssue = (issueToRemove: string) => {
+    setIssues(issues.filter(issue => issue !== issueToRemove));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!notes.trim() || !growStage || !growCycleId) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const logData = {
+        grow_cycle_id: growCycleId,
+        date: date.toISOString().split('T')[0],
+        grow_stage: growStage as any,
+        day_in_stage: dayInStage,
+        height: height ? parseFloat(height) : undefined,
+        notes: notes.trim(),
+        actions: actions.length > 0 ? actions : undefined,
+        issues: issues.length > 0 ? issues : undefined,
+        plant_id: appliesToAll ? null : selectedPlantId,
+        applies_to_all: appliesToAll,
+      };
+
+      await addGrowLog(logData);
+      
+      toast.success('Journal entry added successfully!');
+      onEntryAdded?.();
+      onOpenChange(false);
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to add journal entry');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add Journal Entry</DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
-          {selectedGrow && (
-            <div className="p-3 bg-muted/50 rounded-lg">
-              <p className="text-sm font-medium">Adding entry to: {selectedGrow.name}</p>
-              <p className="text-xs text-muted-foreground">Day {selectedGrow.current_day} - {selectedGrow.current_stage}</p>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="date">Date</Label>
+              <Input
+                id="date"
+                type="date"
+                value={date.toISOString().split('T')[0]}
+                onChange={(e) => setDate(new Date(e.target.value))}
+                required
+              />
             </div>
-          )}
+            <div>
+              <Label htmlFor="day-in-stage">Day in Stage</Label>
+              <Input
+                id="day-in-stage"
+                type="number"
+                min="1"
+                value={dayInStage}
+                onChange={(e) => setDayInStage(parseInt(e.target.value) || 1)}
+                required
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="plant-selection">Apply To</Label>
+            <Select value={selectedPlantId} onValueChange={setSelectedPlantId}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Plants</SelectItem>
+                {plants.map((plant) => (
+                  <SelectItem key={plant.id} value={plant.id}>
+                    {plant.name} {plant.strains && `(${plant.strains.name})`}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground mt-1">
+              Choose whether this entry applies to all plants or a specific plant
+            </p>
+          </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="growStage">Growth Stage *</Label>
+            <div>
+              <Label htmlFor="grow-stage">Grow Stage</Label>
               <Select value={growStage} onValueChange={setGrowStage}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select stage" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="seedling">Seedling</SelectItem>
                   <SelectItem value="vegetative">Vegetative</SelectItem>
                   <SelectItem value="flowering">Flowering</SelectItem>
                   <SelectItem value="harvest">Harvest</SelectItem>
+                  <SelectItem value="drying">Drying</SelectItem>
+                  <SelectItem value="curing">Curing</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="dayInStage">Day in Stage *</Label>
+            <div>
+              <Label htmlFor="height">Height (inches, optional)</Label>
               <Input
-                id="dayInStage"
+                id="height"
                 type="number"
-                min="1"
-                value={dayInStage}
-                onChange={(e) => setDayInStage(e.target.value)}
-                placeholder="e.g., 1"
+                step="0.1"
+                value={height}
+                onChange={(e) => setHeight(e.target.value)}
+                placeholder="e.g., 12.5"
               />
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="notes">Notes *</Label>
+          <div>
+            <Label htmlFor="notes">Notes</Label>
             <Textarea
               id="notes"
+              placeholder="What happened today? Any observations, changes, or activities..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Describe what happened today..."
-              rows={4}
+              className="min-h-[100px]"
               required
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="actions">Actions Taken</Label>
-            <div className="flex gap-2">
+          <div>
+            <Label>Actions Taken</Label>
+            <div className="flex gap-2 mb-2">
               <Input
-                id="actions"
+                placeholder="e.g., Watered, Fed nutrients, Pruned..."
                 value={newAction}
                 onChange={(e) => setNewAction(e.target.value)}
-                placeholder="e.g., Watered, Fed nutrients..."
                 onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addAction())}
               />
               <Button type="button" onClick={addAction} variant="outline" size="sm">
@@ -177,17 +234,38 @@ export const AddJournalEntryModal = ({ open, onOpenChange, growCycleId, onEntryA
             </div>
           </div>
 
-          <Button type="button" variant="outline" className="w-full">
-            <Camera className="h-4 w-4 mr-2" />
-            Add Photos
-          </Button>
+          <div>
+            <Label>Issues/Problems</Label>
+            <div className="flex gap-2 mb-2">
+              <Input
+                placeholder="e.g., Yellowing leaves, Pest spotted..."
+                value={newIssue}
+                onChange={(e) => setNewIssue(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addIssue())}
+              />
+              <Button type="button" onClick={addIssue} variant="outline" size="sm">
+                Add
+              </Button>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {issues.map((issue, index) => (
+                <Badge key={index} variant="destructive" className="gap-1">
+                  {issue}
+                  <X 
+                    className="h-3 w-3 cursor-pointer" 
+                    onClick={() => removeIssue(issue)}
+                  />
+                </Badge>
+              ))}
+            </div>
+          </div>
 
-          <div className="flex gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="flex-1" disabled={loading}>
+          <div className="flex justify-end space-x-2 pt-4">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" className="flex-1" disabled={loading}>
-              {loading ? 'Saving...' : 'Save Entry'}
+            <Button type="submit" disabled={isSubmitting || !notes.trim()}>
+              {isSubmitting ? 'Saving...' : 'Save Entry'}
             </Button>
           </div>
         </form>

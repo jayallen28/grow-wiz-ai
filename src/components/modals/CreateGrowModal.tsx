@@ -5,14 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/hooks/use-toast';
-import { useGrowCycles } from '@/hooks/useGrowCycles';
-import { useStrains } from '@/hooks/useStrains';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
+import { useGrowCycles } from '@/hooks/useGrowCycles';
+import { usePlants } from '@/hooks/usePlants';
+import { toast } from 'sonner';
 
 interface CreateGrowModalProps {
   open: boolean;
@@ -20,100 +16,29 @@ interface CreateGrowModalProps {
   onGrowCreated?: () => void;
 }
 
-export function CreateGrowModal({ open, onOpenChange, onGrowCreated }: CreateGrowModalProps) {
-  console.log('CreateGrowModal: Rendering with props:', { open, onGrowCreated: !!onGrowCreated });
+export const CreateGrowModal = ({ open, onOpenChange, onGrowCreated }: CreateGrowModalProps) => {
   const [name, setName] = useState('');
-  const [strainId, setStrainId] = useState('');
-  const [plantCount, setPlantCount] = useState('1');
-  const [medium, setMedium] = useState('soil');
+  const [startDate, setStartDate] = useState(new Date());
   const [currentStage, setCurrentStage] = useState('seedling');
-  const [startDate, setStartDate] = useState<Date | undefined>(new Date());
+  const [plantCount, setPlantCount] = useState(1);
+  const [medium, setMedium] = useState('');
   const [notes, setNotes] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { toast } = useToast();
   const { addGrowCycle } = useGrowCycles();
-  const { strains } = useStrains();
+  const { createPlantsForGrowCycle } = usePlants();
 
   useEffect(() => {
-    if (!open) {
-      // Reset form when modal closes
+    if (open) {
       setName('');
-      setStrainId('');
-      setPlantCount('1');
-      setMedium('soil');
-      setCurrentStage('seedling');
       setStartDate(new Date());
+      setCurrentStage('seedling');
+      setPlantCount(1);
+      setMedium('');
       setNotes('');
+      setIsSubmitting(false);
     }
   }, [open]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    console.log('CreateGrowModal: Form submission started', { name, strainId, plantCount, medium, currentStage, startDate });
-    
-    if (!name.trim()) {
-      toast({
-        title: "Name Required",
-        description: "Please enter a name for your grow cycle.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!startDate) {
-      toast({
-        title: "Start Date Required",
-        description: "Please select a start date for your grow cycle.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const expectedDuration = getExpectedDuration(currentStage);
-      
-      const growData = {
-        name: name.trim(),
-        strain_id: strainId === 'none' ? null : strainId || null,
-        start_date: startDate.toISOString().split('T')[0],
-        stage_start_date: startDate.toISOString().split('T')[0],
-        current_stage: currentStage as any,
-        expected_stage_duration: expectedDuration,
-        current_day: 1,
-        plant_count: parseInt(plantCount),
-        medium: medium as any,
-        notes: notes.trim() || null,
-        status: 'active' as const,
-      };
-      
-      console.log('CreateGrowModal: About to call addGrowCycle with data:', growData);
-      
-      const result = await addGrowCycle(growData);
-      
-      console.log('CreateGrowModal: addGrowCycle result:', result);
-
-      toast({
-        title: "Grow Created",
-        description: "Your new grow cycle has been created successfully.",
-      });
-
-      onOpenChange(false);
-      onGrowCreated?.();
-    } catch (error: any) {
-      console.error('CreateGrowModal: Error creating grow:', error);
-      toast({
-        title: "Error creating grow",
-        description: error.message || "An unexpected error occurred.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const getExpectedDuration = (stage: string) => {
     switch (stage) {
@@ -122,9 +47,62 @@ export function CreateGrowModal({ open, onOpenChange, onGrowCreated }: CreateGro
       case 'vegetative':
         return 28;
       case 'flowering':
-        return 63;
+        return 56;
+      case 'harvest':
+        return 7;
+      case 'drying':
+        return 7;
+      case 'curing':
+        return 14;
       default:
         return 14;
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!name.trim() || !medium) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const growData = {
+        name: name.trim(),
+        start_date: startDate.toISOString().split('T')[0],
+        stage_start_date: startDate.toISOString().split('T')[0],
+        current_stage: currentStage as any,
+        expected_stage_duration: getExpectedDuration(currentStage as any),
+        current_day: 1,
+        plant_count: plantCount,
+        medium: medium as any,
+        status: 'active' as const,
+        notes: notes.trim() || undefined
+      };
+
+      console.log('Creating grow cycle with data:', growData);
+      
+      const result = await addGrowCycle(growData);
+      console.log('Grow cycle created:', result);
+
+      // Create individual plants for this grow cycle
+      if (result?.id) {
+        console.log('Creating plants for grow cycle:', result.id);
+        await createPlantsForGrowCycle(result.id, plantCount);
+        console.log('Plants created successfully');
+      }
+      
+      toast.success('Grow cycle created successfully!');
+      onGrowCreated?.();
+      onOpenChange(false);
+    } catch (error: any) {
+      console.error('Error creating grow cycle:', error);
+      toast.error(error.message || 'Failed to create grow cycle');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -139,69 +117,47 @@ export function CreateGrowModal({ open, onOpenChange, onGrowCreated }: CreateGro
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Grow Name *</Label>
+          <div>
+            <Label htmlFor="name">Grow Name</Label>
             <Input
               id="name"
-              placeholder="e.g., Northern Lights Summer 2024"
+              placeholder="e.g., Spring 2024 Grow"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="strain">Strain</Label>
-            <Select value={strainId} onValueChange={setStrainId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a strain (optional)" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">No strain selected</SelectItem>
-                {strains.map((strain) => (
-                  <SelectItem key={strain.id} value={strain.id}>
-                    {strain.name} ({strain.type})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div>
+            <Label htmlFor="start-date">Start Date</Label>
+            <Input
+              id="start-date"
+              type="date"
+              value={format(startDate, 'yyyy-MM-dd')}
+              onChange={(e) => setStartDate(new Date(e.target.value))}
+              required
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="plant-count">Number of Plants</Label>
+            <Input
+              id="plant-count"
+              type="number"
+              min="1"
+              max="50"
+              value={plantCount}
+              onChange={(e) => setPlantCount(parseInt(e.target.value) || 1)}
+              required
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Individual plants will be created automatically. You can assign strains to each plant after creation.
+            </p>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="plantCount">Plant Count *</Label>
-              <Input
-                id="plantCount"
-                type="number"
-                min="1"
-                max="100"
-                value={plantCount}
-                onChange={(e) => setPlantCount(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="medium">Growing Medium *</Label>
-              <Select value={medium} onValueChange={setMedium}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="soil">Soil</SelectItem>
-                  <SelectItem value="coco">Coco Coir</SelectItem>
-                  <SelectItem value="dwc">Deep Water Culture (DWC)</SelectItem>
-                  <SelectItem value="rockwool">Rockwool</SelectItem>
-                  <SelectItem value="perlite">Perlite</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="stage">Starting Stage *</Label>
+            <div>
+              <Label htmlFor="current-stage">Current Stage</Label>
               <Select value={currentStage} onValueChange={setCurrentStage}>
                 <SelectTrigger>
                   <SelectValue />
@@ -214,59 +170,45 @@ export function CreateGrowModal({ open, onOpenChange, onGrowCreated }: CreateGro
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label>Start Date *</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !startDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {startDate ? format(startDate, "PPP") : "Select date"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={startDate}
-                    onSelect={setStartDate}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+            <div>
+              <Label htmlFor="medium">Growing Medium</Label>
+              <Select value={medium} onValueChange={setMedium}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select growing medium" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="dwc">Deep Water Culture (DWC)</SelectItem>
+                  <SelectItem value="soil">Soil</SelectItem>
+                  <SelectItem value="coco">Coco Coir</SelectItem>
+                  <SelectItem value="rockwool">Rockwool</SelectItem>
+                  <SelectItem value="perlite">Perlite</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="notes">Notes</Label>
+          <div>
+            <Label htmlFor="notes">Notes (Optional)</Label>
             <Textarea
               id="notes"
-              placeholder="Optional notes about this grow cycle..."
-              rows={3}
+              placeholder="Any additional notes about this grow cycle..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
+              className="min-h-[80px]"
             />
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={loading}
-            >
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? 'Creating...' : 'Create Grow'}
+            <Button type="submit" disabled={isSubmitting || !name.trim() || !medium}>
+              {isSubmitting ? 'Creating...' : 'Create Grow Cycle'}
             </Button>
           </div>
         </form>
       </DialogContent>
     </Dialog>
   );
-}
+};

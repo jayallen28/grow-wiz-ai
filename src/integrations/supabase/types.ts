@@ -388,6 +388,7 @@ export type Database = {
       grow_logs: {
         Row: {
           actions: string[] | null
+          applies_to_all: boolean | null
           created_at: string
           date: string
           day_in_stage: number
@@ -398,11 +399,13 @@ export type Database = {
           issues: string[] | null
           notes: string
           photos: string[] | null
+          plant_id: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           actions?: string[] | null
+          applies_to_all?: boolean | null
           created_at?: string
           date: string
           day_in_stage: number
@@ -413,11 +416,13 @@ export type Database = {
           issues?: string[] | null
           notes: string
           photos?: string[] | null
+          plant_id?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           actions?: string[] | null
+          applies_to_all?: boolean | null
           created_at?: string
           date?: string
           day_in_stage?: number
@@ -428,6 +433,7 @@ export type Database = {
           issues?: string[] | null
           notes?: string
           photos?: string[] | null
+          plant_id?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -506,6 +512,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      plants: {
+        Row: {
+          created_at: string
+          grow_cycle_id: string
+          id: string
+          name: string
+          notes: string | null
+          photos: string[] | null
+          plant_number: number
+          status: string
+          strain_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          grow_cycle_id: string
+          id?: string
+          name: string
+          notes?: string | null
+          photos?: string[] | null
+          plant_number: number
+          status?: string
+          strain_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          grow_cycle_id?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          photos?: string[] | null
+          plant_number?: number
+          status?: string
+          strain_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {

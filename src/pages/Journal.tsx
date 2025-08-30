@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Camera, Plus, Calendar, Sprout, PlayCircle, PauseCircle } from 'lucide-react';
 import { AddJournalEntryModal } from '@/components/modals/AddJournalEntryModal';
 import { CreateGrowModal } from '@/components/modals/CreateGrowModal';
+import { PlantManagement } from '@/components/journal/PlantManagement';
 import { useGrowCycles } from '@/hooks/useGrowCycles';
 import { useGrowLogs } from '@/hooks/useGrowLogs';
 import { useAuth } from '@/hooks/useAuth';
@@ -160,6 +161,13 @@ const Journal = () => {
           </Card>
         </div>
 
+        {/* Plant Management */}
+        {selectedGrow && (
+          <div className="mb-6">
+            <PlantManagement growCycleId={selectedGrow.id} />
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <Card>
@@ -188,9 +196,16 @@ const Journal = () => {
                     selectedGrowLogs.map((log) => (
                       <div key={log.id} className="p-4 border border-border rounded-lg">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="font-medium">
-                            Day {log.day_in_stage} - {log.grow_stage}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">
+                              Day {log.day_in_stage} - {log.grow_stage}
+                            </span>
+                            {log.applies_to_all === false && (
+                              <Badge variant="outline" className="text-xs">
+                                Plant-specific
+                              </Badge>
+                            )}
+                          </div>
                           <span className="text-sm text-muted-foreground">
                             {format(new Date(log.date), 'MMM d, yyyy')}
                           </span>
