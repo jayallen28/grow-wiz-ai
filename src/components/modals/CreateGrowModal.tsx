@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -78,7 +78,7 @@ export function CreateGrowModal({ open, onOpenChange, onGrowCreated }: CreateGro
       
       const growData = {
         name: name.trim(),
-        strain_id: strainId || null,
+        strain_id: strainId === 'none' ? null : strainId || null,
         start_date: startDate.toISOString().split('T')[0],
         stage_start_date: startDate.toISOString().split('T')[0],
         current_stage: currentStage as any,
@@ -133,6 +133,9 @@ export function CreateGrowModal({ open, onOpenChange, onGrowCreated }: CreateGro
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Create New Grow Cycle</DialogTitle>
+          <DialogDescription>
+            Set up a new grow cycle to start tracking your cannabis cultivation journey.
+          </DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -154,7 +157,7 @@ export function CreateGrowModal({ open, onOpenChange, onGrowCreated }: CreateGro
                 <SelectValue placeholder="Select a strain (optional)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">No strain selected</SelectItem>
+                <SelectItem value="none">No strain selected</SelectItem>
                 {strains.map((strain) => (
                   <SelectItem key={strain.id} value={strain.id}>
                     {strain.name} ({strain.type})
