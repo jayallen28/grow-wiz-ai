@@ -3,10 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import {
   Home,
   BookOpen,
-  Thermometer,
-  Droplets,
   Sprout,
-  Settings,
   Menu,
   X,
   Calculator,
@@ -17,15 +14,16 @@ import { cn } from '@/lib/utils';
 import { ProfileDropdown } from './ProfileDropdown';
 import { useAuth } from '@/hooks/useAuth';
 
+// Import your logo assets
+import FullLogo from '@/assets/OptimalGrows-logo-full.svg';
+import LogoMark from '@/assets/OptimalGrows-Logomark.svg';
+
 const navigationItems = [
   { name: 'Dashboard', href: '/dashboard', icon: Home },
   { name: 'Build Planner', href: '/build-planner', icon: Calculator },
-  { name: 'Learn', href: '/learn', icon: GraduationCap },
   { name: 'Journal', href: '/journal', icon: BookOpen },
-  // { name: 'Environment', href: '/environment', icon: Thermometer },
-  // { name: 'Nutrients', href: '/nutrients', icon: Droplets },
   { name: 'Strains', href: '/strains', icon: Sprout },
-  // { name: 'Settings', href: '/settings', icon: Settings },
+  { name: 'Learn', href: '/learn', icon: GraduationCap },
 ];
 
 export function Navigation() {
@@ -39,15 +37,18 @@ export function Navigation() {
       <nav className="hidden md:flex fixed top-0 left-0 right-0 z-50 bg-card/90 backdrop-blur-md border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="flex justify-between h-16">
+            {/* Logo */}
             <div className="flex items-center">
-              <div className="flex-shrink-0 flex items-center">
-                <Sprout className="h-8 w-8 text-primary mr-3" />
-                <span className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                  Optimal Grows
-                </span>
-              </div>
+              <Link to="/dashboard" className="flex-shrink-0 flex items-center">
+                <img
+                  src={FullLogo}
+                  alt="Optimal Grows"
+                  className="h-8 w-auto"
+                />
+              </Link>
             </div>
 
+            {/* Nav Items */}
             <div className="flex items-center space-x-4">
               {navigationItems.map((item) => {
                 const Icon = item.icon;
@@ -69,7 +70,7 @@ export function Navigation() {
                   </Link>
                 );
               })}
-              
+
               {user && <ProfileDropdown />}
             </div>
           </div>
@@ -80,12 +81,14 @@ export function Navigation() {
       <nav className="md:hidden fixed top-0 left-0 right-0 z-50 bg-card/90 backdrop-blur-md border-b border-border">
         <div className="px-4 sm:px-6">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <Sprout className="h-6 w-6 text-primary mr-2" />
-              <span className="text-lg font-bold bg-gradient-primary bg-clip-text text-transparent">
-                Optimal Grows
-              </span>
-            </div>
+            {/* Mobile Logo (logomark) */}
+            <Link to="/dashboard" className="flex items-center">
+              <img
+                src={LogoMark}
+                alt="Optimal Grows"
+                className="h-8 w-auto"
+              />
+            </Link>
 
             <Button
               variant="ghost"
