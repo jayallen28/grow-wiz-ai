@@ -108,47 +108,6 @@ const BuildSummary = ({
                         toggleCategory={() => toggleCategory(category)}
                         onRemoveComponent={onRemoveComponent}
                         onUpdateQuantity={onUpdateQuantity}
-                        renderProduct={(product) => (
-                          <motion.div
-                            layout
-                            key={product.id}
-                            className="border border-border rounded-lg p-2 w-full flex flex-col gap-1"
-                          >
-                            {/* Row 1: Image + Quantity */}
-                            <div className="flex items-center gap-2">
-                              <img
-                                src={product.image}
-                                alt={product.title}
-                                className="w-12 h-12 object-cover rounded"
-                              />
-                              <AnimatePresence>
-                                <motion.div
-                                  key={product.quantity}
-                                  initial={{ scale: 0.7 }}
-                                  animate={{ scale: 1 }}
-                                  exit={{ scale: 0 }}
-                                >
-                                  <Badge variant="secondary">{product.quantity}</Badge>
-                                </motion.div>
-                              </AnimatePresence>
-                            </div>
-
-                            {/* Row 2: Title */}
-                            <div className="text-sm font-medium truncate">{product.title}</div>
-
-                            {/* Row 3: Price & Power */}
-                            <div className="flex justify-between text-xs text-gray-300 flex-wrap gap-2">
-                              <div className="flex flex-col min-w-[80px]">
-                                <span className="text-gray-400">Price</span>
-                                <span className="text-green-500 truncate">${product.price}</span>
-                              </div>
-                              <div className="flex flex-col min-w-[80px]">
-                                <span className="text-gray-400">Power</span>
-                                <span className="text-yellow-400">{product.power}W</span>
-                              </div>
-                            </div>
-                          </motion.div>
-                        )}
                       />
                     );
                   })}

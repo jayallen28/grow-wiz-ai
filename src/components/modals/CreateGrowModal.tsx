@@ -21,6 +21,7 @@ interface CreateGrowModalProps {
 }
 
 export function CreateGrowModal({ open, onOpenChange, onGrowCreated }: CreateGrowModalProps) {
+  console.log('CreateGrowModal: Rendering with props:', { open, onGrowCreated: !!onGrowCreated });
   const [name, setName] = useState('');
   const [strainId, setStrainId] = useState('');
   const [plantCount, setPlantCount] = useState('1');
@@ -50,6 +51,8 @@ export function CreateGrowModal({ open, onOpenChange, onGrowCreated }: CreateGro
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('CreateGrowModal: Form submission started', { name, strainId, plantCount, medium, currentStage, startDate });
+    
     if (!name.trim()) {
       toast({
         title: "Name Required",
@@ -73,7 +76,7 @@ export function CreateGrowModal({ open, onOpenChange, onGrowCreated }: CreateGro
     try {
       const expectedDuration = getExpectedDuration(currentStage);
       
-      await addGrowCycle({
+      const growData = {
         name: name.trim(),
         strain_id: strainId || null,
         start_date: startDate.toISOString().split('T')[0],
@@ -84,8 +87,14 @@ export function CreateGrowModal({ open, onOpenChange, onGrowCreated }: CreateGro
         plant_count: parseInt(plantCount),
         medium: medium as any,
         notes: notes.trim() || null,
-        status: 'active',
-      });
+        status: 'active' as const,
+      };
+      
+      console.log('CreateGrowModal: About to call addGrowCycle with data:', growData);
+      
+      const result = await addGrowCycle(growData);
+      
+      console.log('CreateGrowModal: addGrowCycle result:', result);
 
       toast({
         title: "Grow Created",
@@ -95,9 +104,10 @@ export function CreateGrowModal({ open, onOpenChange, onGrowCreated }: CreateGro
       onOpenChange(false);
       onGrowCreated?.();
     } catch (error: any) {
+      console.error('CreateGrowModal: Error creating grow:', error);
       toast({
         title: "Error creating grow",
-        description: error.message,
+        description: error.message || "An unexpected error occurred.",
         variant: "destructive",
       });
     } finally {
@@ -177,8 +187,10 @@ export function CreateGrowModal({ open, onOpenChange, onGrowCreated }: CreateGro
                 <SelectContent>
                   <SelectItem value="soil">Soil</SelectItem>
                   <SelectItem value="coco">Coco Coir</SelectItem>
-                  <SelectItem value="hydro">Hydroponic</SelectItem>
-                  <SelectItem value="soilless">Soilless Mix</SelectItem>
+                  <SelectItem value="dwc">Deep Water Culture (DWC)</SelectItem>
+                  <SelectItem value="rockwool">Rockwool</SelectItem>
+                  <SelectItem value="perlite">Perlite</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
                 </SelectContent>
               </Select>
             </div>

@@ -19,7 +19,7 @@ const Journal = () => {
 
   const { user } = useAuth();
   const { growCycles, currentGrow, refetch: refetchGrowCycles } = useGrowCycles();
-  const { growLogs, refetch: refetchGrowLogs } = useGrowLogs();
+  const { growLogs, refetch: refetchGrowLogs } = useGrowLogs(selectedGrowId);
 
   // Set selected grow to current grow by default
   useEffect(() => {
