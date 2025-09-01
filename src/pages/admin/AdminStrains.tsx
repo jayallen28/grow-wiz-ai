@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { Search, Plus, Leaf, BarChart3, Clock, TrendingUp, Edit, Trash2, Upload } from 'lucide-react';
+import Papa from 'papaparse';
 
 interface Strain {
   id: string;
@@ -30,7 +31,10 @@ export default function AdminStrains() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [csvDialogOpen, setCsvDialogOpen] = useState(false);
   const [editingStrain, setEditingStrain] = useState<Strain | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -183,6 +187,72 @@ export default function AdminStrains() {
     });
   };
 
+  const handleCsvUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('No authenticated user');
+
+      Papa.parse(file, {
+        header: true,
+        complete: async (results) => {
+          const validStrains = results.data.filter((row: any) => 
+            row.name && row.type && ['indica', 'sativa', 'hybrid'].includes(row.type.toLowerCase())
+          );
+
+          if (validStrains.length === 0) {
+            throw new Error('No valid strains found in CSV. Required fields: name, type');
+          }
+
+          const strainsData = validStrains.map((row: any) => ({
+            name: row.name,
+            type: row.type.toLowerCase(),
+            flowering_time: row.flowering_time ? parseInt(row.flowering_time) : null,
+            expected_yield: row.expected_yield || null,
+            thc_content: row.thc_content || null,
+            cbd_content: row.cbd_content || null,
+            growth_pattern: row.growth_pattern || null,
+            notes: row.notes || null,
+            user_id: user.id,
+          }));
+
+          const { error } = await supabase
+            .from('strains')
+            .insert(strainsData);
+
+          if (error) throw error;
+
+          toast({
+            title: "Success",
+            description: `Imported ${validStrains.length} strains from CSV`,
+          });
+
+          setCsvDialogOpen(false);
+          fetchStrains();
+        },
+        error: (error) => {
+          throw new Error(`CSV parsing error: ${error.message}`);
+        }
+      });
+    } catch (error) {
+      console.error('Error uploading CSV:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to upload CSV",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
   const filteredStrains = strains.filter(strain =>
     strain.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     strain.type.toLowerCase().includes(searchTerm.toLowerCase())
@@ -205,10 +275,50 @@ export default function AdminStrains() {
           <p className="text-muted-foreground">Manage cannabis strains for users' grow journals</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline">
-            <Upload className="h-4 w-4 mr-2" />
-            Import CSV
-          </Button>
+          <Dialog open={csvDialogOpen} onOpenChange={setCsvDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline">
+                <Upload className="h-4 w-4 mr-2" />
+                Import CSV
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Import Strains from CSV</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label>CSV File</Label>
+                  <Input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".csv"
+                    onChange={handleCsvUpload}
+                    disabled={uploading}
+                  />
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  <p className="font-medium mb-2">CSV Format Requirements:</p>
+                  <ul className="list-disc list-inside space-y-1">
+                    <li><strong>name</strong> (required): Strain name</li>
+                    <li><strong>type</strong> (required): indica, sativa, or hybrid</li>
+                    <li><strong>flowering_time</strong> (optional): Number of days</li>
+                    <li><strong>expected_yield</strong> (optional): e.g., "400-500g/m²"</li>
+                    <li><strong>thc_content</strong> (optional): e.g., "18-22%"</li>
+                    <li><strong>cbd_content</strong> (optional): e.g., "&lt;1%"</li>
+                    <li><strong>growth_pattern</strong> (optional): e.g., "Compact, Bushy"</li>
+                    <li><strong>notes</strong> (optional): Additional information</li>
+                  </ul>
+                </div>
+                {uploading && (
+                  <div className="flex items-center justify-center py-4">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                    <span className="ml-2">Importing strains...</span>
+                  </div>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
               <Button onClick={resetForm}>
