@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 import ComponentCard from './ComponentCard';
 import { BuildComponent, ComponentCategory, BuildComponentWithQuantity } from '@/types/buildPlanner';
-import { availableComponents } from '@/data/buildComponents';
+import { useBuildComponents } from '@/hooks/useBuildComponents';
 
 interface ComponentSelectorProps {
   onAddComponent: (component: BuildComponent) => void;
@@ -16,6 +16,7 @@ interface ComponentSelectorProps {
 
 const ComponentSelector = ({ onAddComponent, selectedComponents, selectedCategory }: ComponentSelectorProps) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const { components, loading } = useBuildComponents();
 
   const categoryLabels: Partial<Record<ComponentCategory, string>> = {
     'grow-tent': 'Grow Tents',
@@ -23,11 +24,24 @@ const ComponentSelector = ({ onAddComponent, selectedComponents, selectedCategor
     'ventilation': 'Ventilation',
     'carbon-filter': 'Carbon Filters',
     'ph-meter': 'pH Meters',
+    'tds-meter': 'TDS Meters',
+    'timer': 'Timers',
+    'thermometer': 'Thermometers',
+    'hygrometer': 'Hygrometers',
+    'co2-controller': 'CO2 Controllers',
+    'grow-medium': 'Grow Medium',
+    'pots': 'Pots',
+    'ducting': 'Ducting',
+    'oscillating-fan': 'Oscillating Fans',
+    'dehumidifier': 'Dehumidifiers',
+    'humidifier': 'Humidifiers',
+    'arduino-kit': 'Arduino Kits',
+    'sensors': 'Sensors',
     'nutrients': 'Nutrients',
     'accessories': 'Accessories'
   };
 
-  const filteredComponents = availableComponents
+  const filteredComponents = components
     .filter(component => component.category === selectedCategory)
     .filter(component => 
       component.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -53,22 +67,29 @@ const ComponentSelector = ({ onAddComponent, selectedComponents, selectedCategor
         </div>
       </CardHeader>
       <CardContent>
-        <div className="grid md:grid-cols-2 gap-4">
-          {filteredComponents.map(component => (
-            <ComponentCard
-              key={component.id}
-              component={component}
-              isSelected={isComponentSelected(component)}
-              onAdd={() => onAddComponent(component)}
-            />
-          ))}
-        </div>
-        {filteredComponents.length === 0 && (
+        {loading ? (
           <div className="text-center py-8 text-muted-foreground">
-            No components found matching your search.
+            Loading components...
           </div>
+        ) : (
+          <>
+            <div className="grid md:grid-cols-2 gap-4">
+              {filteredComponents.map(component => (
+                <ComponentCard
+                  key={component.id}
+                  component={component}
+                  isSelected={isComponentSelected(component)}
+                  onAdd={() => onAddComponent(component)}
+                />
+              ))}
+            </div>
+            {filteredComponents.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground">
+                No components found matching your search.
+              </div>
+            )}
+          </>
         )}
-        
       </CardContent>
     </Card>
   );

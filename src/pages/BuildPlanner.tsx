@@ -7,13 +7,14 @@ import ComponentSelector from '@/components/build-planner/ComponentSelector';
 import BuildSummary from '@/components/build-planner/BuildSummary';
 import CategoryNavigation from '@/components/build-planner/CategoryNavigation';
 import { BuildComponent, BuildConfiguration, ComponentCategory, BuildComponentWithQuantity } from '@/types/buildPlanner';
-import { availableComponents } from '@/data/buildComponents';
+import { useBuildComponents } from '@/hooks/useBuildComponents';
 
 const BuildPlanner = () => {
   const [selectedComponents, setSelectedComponents] = useState<{
     [category in ComponentCategory]?: BuildComponentWithQuantity[];
   }>({});
   const [selectedCategory, setSelectedCategory] = useState<ComponentCategory>('grow-tent');
+  const { components } = useBuildComponents();
 
   const addComponent = (component: BuildComponent) => {
     setSelectedComponents(prev => ({
@@ -58,7 +59,7 @@ const BuildPlanner = () => {
   const getComponentCounts = () => {
     const counts: Partial<Record<ComponentCategory, number>> = {};
     
-    availableComponents.forEach(component => {
+    components.forEach(component => {
       counts[component.category] = (counts[component.category] || 0) + 1;
     });
     
