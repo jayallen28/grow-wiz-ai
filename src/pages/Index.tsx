@@ -22,18 +22,22 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
+import { useEmailSubscriptions } from '@/hooks/useEmailSubscriptions';
 
 const Index = () => {
   const [email, setEmail] = useState('');
   const [isSubscribed, setIsSubscribed] = useState(false);
+  const { subscribe, loading } = useEmailSubscriptions();
 
-  const handleEmailSubmit = (e: React.FormEvent) => {
+  const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email) {
-      // TODO: Integrate with email service
-      setIsSubscribed(true);
-      setTimeout(() => setIsSubscribed(false), 3000);
-      setEmail('');
+    if (email && !loading) {
+      const success = await subscribe(email);
+      if (success) {
+        setIsSubscribed(true);
+        setTimeout(() => setIsSubscribed(false), 3000);
+        setEmail('');
+      }
     }
   };
 
@@ -95,7 +99,7 @@ const Index = () => {
                 type="submit" 
                 size="lg" 
                 className="h-12 px-8 bg-gradient-primary hover:opacity-90 text-lg font-semibold"
-                disabled={isSubscribed}
+                disabled={isSubscribed || loading}
               >
                 {isSubscribed ? (
                   <>

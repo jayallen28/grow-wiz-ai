@@ -10,7 +10,8 @@ import {
   BarChart3,
   Settings,
   Menu,
-  X
+  X,
+  Mail
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -21,6 +22,7 @@ const adminNavItems = [
   { name: "Articles", href: "/admin/articles", icon: FileText },
   { name: "Build Components", href: "/admin/components", icon: Wrench },
   { name: "Strains", href: "/admin/strains", icon: Leaf },
+  { name: "Email Subscriptions", href: "/admin/email-subscriptions", icon: Mail },
   { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
   { name: "Settings", href: "/admin/settings", icon: Settings },
 ];
