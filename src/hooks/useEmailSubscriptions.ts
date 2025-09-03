@@ -1,99 +1,139 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+export interface EmailSubscription {
+  id: string;
+  email: string;
+  subscribed_at: string;
+  ip_address?: string;
+  user_agent?: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export function useEmailSubscriptions() {
-  const [loading, setLoading] = useState(false);
+  const [subscriptions, setSubscriptions] = useState<EmailSubscription[]>([]);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  const subscribe = async (email: string) => {
-    setLoading(true);
+  const fetchSubscriptions = async () => {
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('email_subscriptions')
-        .insert([
-          {
-            email,
-            ip_address: null, // Could be populated with IP detection if needed
-            user_agent: navigator.userAgent
-          }
-        ]);
+        .select('*')
+        .order('subscribed_at', { ascending: false });
 
-      if (error) {
-        if (error.code === '23505') {
-          toast({
-            title: "Already subscribed",
-            description: "This email is already subscribed to our updates.",
-            variant: "default"
-          });
-          return false;
-        }
-        throw error;
-      }
-
-      toast({
-        title: "Successfully subscribed!",
-        description: "Thank you for subscribing to early access updates.",
-        variant: "default"
-      });
-      
-      return true;
+      if (error) throw error;
+      setSubscriptions(data || []);
     } catch (error) {
-      console.error('Error subscribing email:', error);
+      console.error('Error fetching email subscriptions:', error);
       toast({
         title: "Error",
-        description: "Failed to subscribe. Please try again.",
-        variant: "destructive"
+        description: "Failed to fetch email subscriptions",
+        variant: "destructive",
       });
-      return false;
     } finally {
       setLoading(false);
     }
   };
 
-  const getSubscriptions = async () => {
-    const { data, error } = await supabase
-      .from('email_subscriptions')
-      .select('*')
-      .order('subscribed_at', { ascending: false });
+  const addSubscription = async (email: string) => {
+    try {
+      const { error } = await supabase
+        .from('email_subscriptions')
+        .insert({
+          email,
+          ip_address: null, // Could be enhanced to capture real IP
+          user_agent: navigator.userAgent,
+        });
 
-    if (error) {
-      console.error('Error fetching subscriptions:', error);
-      return [];
-    }
+      if (error) {
+        if (error.code === '23505') { // Unique constraint violation
+          throw new Error('This email is already subscribed');
+        }
+        throw error;
+      }
 
-    return data || [];
-  };
+      toast({
+        title: "Success!",
+        description: "Thank you for subscribing to early access!",
+      });
 
-  const updateSubscription = async (id: string, updates: { is_active?: boolean }) => {
-    const { error } = await supabase
-      .from('email_subscriptions')
-      .update(updates)
-      .eq('id', id);
-
-    if (error) {
-      console.error('Error updating subscription:', error);
+      fetchSubscriptions();
+      return true;
+    } catch (error: any) {
+      console.error('Error adding subscription:', error);
       toast({
         title: "Error",
-        description: "Failed to update subscription.",
-        variant: "destructive"
+        description: error.message || "Failed to subscribe",
+        variant: "destructive",
       });
       return false;
     }
-
-    toast({
-      title: "Updated",
-      description: "Subscription status updated successfully.",
-      variant: "default"
-    });
-    
-    return true;
   };
 
+  const updateSubscription = async (id: string, updates: Partial<EmailSubscription>) => {
+    try {
+      const { error } = await supabase
+        .from('email_subscriptions')
+        .update(updates)
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Subscription updated successfully",
+      });
+
+      fetchSubscriptions();
+    } catch (error) {
+      console.error('Error updating subscription:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update subscription",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const deleteSubscription = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('email_subscriptions')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Subscription deleted successfully",
+      });
+
+      fetchSubscriptions();
+    } catch (error) {
+      console.error('Error deleting subscription:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete subscription",
+        variant: "destructive",
+      });
+    }
+  };
+
+  useEffect(() => {
+    fetchSubscriptions();
+  }, []);
+
   return {
-    subscribe,
-    getSubscriptions,
+    subscriptions,
+    loading,
+    addSubscription,
     updateSubscription,
-    loading
+    deleteSubscription,
+    refetch: fetchSubscriptions,
   };
 }

@@ -22,7 +22,7 @@ const adminNavItems = [
   { name: "Articles", href: "/admin/articles", icon: FileText },
   { name: "Build Components", href: "/admin/components", icon: Wrench },
   { name: "Strains", href: "/admin/strains", icon: Leaf },
-  { name: "Email Subscriptions", href: "/admin/email-subscriptions", icon: Mail },
+  { name: "Email Subscriptions", href: "/admin/subscriptions", icon: Mail },
   { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
   { name: "Settings", href: "/admin/settings", icon: Settings },
 ];

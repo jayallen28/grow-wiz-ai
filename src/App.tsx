@@ -24,7 +24,7 @@ import AdminComponents from "./pages/admin/AdminComponents";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminStrains from "./pages/admin/AdminStrains";
 import AdminAnalytics from "./pages/admin/AdminAnalytics";
-import AdminEmailSubscriptions from "./pages/admin/AdminEmailSubscriptions";
+import AdminSubscriptions from "./pages/admin/AdminSubscriptions";
 import AdminProtectedRoute from "./components/admin/AdminProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -60,9 +60,9 @@ const App = () => (
             <Route path="articles/edit/:id" element={<AdminArticleEditor />} />
             <Route path="components" element={<AdminComponents />} />
             <Route path="strains" element={<AdminStrains />} />
-            <Route path="email-subscriptions" element={<AdminEmailSubscriptions />} />
+            <Route path="subscriptions" element={<AdminSubscriptions />} />
             <Route path="analytics" element={<AdminAnalytics />} />
-          </Route>
+              </Route>
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

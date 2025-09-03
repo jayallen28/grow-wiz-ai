@@ -26,18 +26,18 @@ import { useEmailSubscriptions } from '@/hooks/useEmailSubscriptions';
 
 const Index = () => {
   const [email, setEmail] = useState('');
-  const [isSubscribed, setIsSubscribed] = useState(false);
-  const { subscribe, loading } = useEmailSubscriptions();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { addSubscription } = useEmailSubscriptions();
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email && !loading) {
-      const success = await subscribe(email);
+    if (email && !isSubmitting) {
+      setIsSubmitting(true);
+      const success = await addSubscription(email);
       if (success) {
-        setIsSubscribed(true);
-        setTimeout(() => setIsSubscribed(false), 3000);
         setEmail('');
       }
+      setIsSubmitting(false);
     }
   };
 
@@ -99,12 +99,12 @@ const Index = () => {
                 type="submit" 
                 size="lg" 
                 className="h-12 px-8 bg-gradient-primary hover:opacity-90 text-lg font-semibold"
-                disabled={isSubscribed || loading}
+                disabled={isSubmitting}
               >
-                {isSubscribed ? (
+                {isSubmitting ? (
                   <>
                     <CheckCircle className="mr-2 h-5 w-5" />
-                    Added!
+                    Subscribing...
                   </>
                 ) : (
                   <>
@@ -344,12 +344,12 @@ const Index = () => {
                 type="submit" 
                 size="lg" 
                 className="h-14 px-8 bg-gradient-primary hover:opacity-90 text-lg font-semibold"
-                disabled={isSubscribed}
+                disabled={isSubmitting}
               >
-                {isSubscribed ? (
+                {isSubmitting ? (
                   <>
                     <CheckCircle className="mr-2 h-5 w-5" />
-                    Added!
+                    Subscribing...
                   </>
                 ) : (
                   <>
@@ -433,12 +433,12 @@ const Index = () => {
             <Button 
               type="submit" 
               className="bg-gradient-primary hover:opacity-90 whitespace-nowrap"
-              disabled={isSubscribed}
+              disabled={isSubmitting}
             >
-              {isSubscribed ? (
+              {isSubmitting ? (
                 <>
                   <CheckCircle className="mr-2 h-4 w-4" />
-                  Added!
+                  Subscribing...
                 </>
               ) : (
                 <>
