@@ -43,10 +43,26 @@ export function useArticles() {
   const fetchArticles = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      setError(null);
+      
+      // First try to get all articles (works if user is admin)
+      let { data, error } = await supabase
         .from('articles')
         .select('*')
         .order('created_at', { ascending: false });
+
+      // If access denied, try fetching only published articles
+      if (error && error.message?.includes('RLS')) {
+        console.log('Admin access denied, fetching published articles only');
+        const publishedResult = await supabase
+          .from('articles')
+          .select('*')
+          .eq('is_published', true)
+          .order('published_at', { ascending: false });
+        
+        data = publishedResult.data;
+        error = publishedResult.error;
+      }
 
       if (error) throw error;
       setArticles(data || []);

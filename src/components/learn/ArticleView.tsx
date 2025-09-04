@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Clock, BookOpen, Lightbulb, AlertTriangle, CheckCircle } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -418,8 +419,8 @@ export default function ArticleView({ articleId, onBack }: ArticleViewProps) {
         </div>
       )}
 
-      <div className="prose prose-lg max-w-none">
-        <div dangerouslySetInnerHTML={{ __html: article.content.replace(/\n/g, '<br/>') }} />
+      <div className="prose prose-lg max-w-none dark:prose-invert">
+        <ReactMarkdown>{article.content}</ReactMarkdown>
       </div>
 
       <Separator className="my-8" />
