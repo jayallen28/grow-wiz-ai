@@ -112,7 +112,10 @@ export default function Learn() {
   const filteredRealArticles = publishedArticles.filter(article => {
     const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          (article.tags || []).some((tag: string) => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-    const matchesCategory = selectedCategory === 'all' || article.category === getCategoryNameById(selectedCategory);
+    // Fix category matching - compare article.category directly with category names
+    const matchesCategory = selectedCategory === 'all' || 
+                           article.category === getCategoryNameById(selectedCategory) ||
+                           categories.some(cat => cat.id === selectedCategory && cat.name === article.category);
     return matchesSearch && matchesCategory;
   });
 

@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { useArticles } from "@/hooks/useArticles";
 import { useToast } from "@/hooks/use-toast";
+import { ImageUploadWithCompression } from "@/components/admin/ImageUploadWithCompression";
 
 const articleCategories = [
   "Growing Basics",
@@ -323,18 +324,31 @@ export default function AdminArticleEditor() {
               </div>
 
               <div>
-                <Label htmlFor="featured_image_url">Featured Image URL</Label>
-                <Controller
-                  name="featured_image_url"
-                  control={control}
-                  render={({ field }) => (
-                    <Input
-                      {...field}
-                      placeholder="https://example.com/image.jpg"
-                      className="mt-2"
+                <Label>Featured Image</Label>
+                <div className="mt-2">
+                  <ImageUploadWithCompression
+                    currentImageUrl={watch("featured_image_url")}
+                    onImageUploaded={(url) => setValue("featured_image_url", url, { shouldDirty: true })}
+                    disabled={isLoading}
+                  />
+                </div>
+                {watch("featured_image_url") && (
+                  <div className="mt-2">
+                    <Label className="text-xs text-muted-foreground">Image URL</Label>
+                    <Controller
+                      name="featured_image_url"
+                      control={control}
+                      render={({ field }) => (
+                        <Input
+                          {...field}
+                          placeholder="https://example.com/image.jpg"
+                          className="mt-1 text-xs"
+                          readOnly
+                        />
+                      )}
                     />
-                  )}
-                />
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
