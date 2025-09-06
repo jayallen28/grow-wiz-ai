@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Search, Book, Lightbulb, Shield, Droplets, Thermometer, Bug, Calendar, AlertTriangle } from 'lucide-react';
+import { Search, Book, BookOpen, Lightbulb, Shield, Droplets, Thermometer, Bug, Calendar, AlertTriangle } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 import { Navigation } from '@/components/layout/Navigation';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -108,6 +109,14 @@ export default function Learn() {
     loadPublishedArticles();
   }, [fetchPublishedArticles]);
 
+  // Get unique categories from published articles
+  const getAvailableCategories = () => {
+    const publishedCategories = new Set(publishedArticles.map(article => article.category));
+    return categories.filter(category => publishedCategories.has(category.name));
+  };
+
+  const availableCategories = getAvailableCategories();
+
   // Filter real articles from Supabase
   const filteredRealArticles = publishedArticles.filter(article => {
     const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -179,9 +188,9 @@ export default function Learn() {
         </div>
 
         <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="w-full">
-          <TabsList className="grid w-full grid-cols-7 mb-8">
+          <TabsList className={`grid w-full mb-8 ${availableCategories.length > 0 ? `grid-cols-${Math.min(availableCategories.length + 1, 7)}` : 'grid-cols-1'}`}>
             <TabsTrigger value="all">All Topics</TabsTrigger>
-            {categories.map((category) => (
+            {availableCategories.map((category) => (
               <TabsTrigger key={category.id} value={category.id} className="text-xs">
                 {category.name.split(' ')[0]}
               </TabsTrigger>
@@ -189,67 +198,131 @@ export default function Learn() {
           </TabsList>
 
           <TabsContent value="all">
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
-              {categories.map((category) => {
-                const Icon = category.icon;
-                return (
-                  <Card 
-                    key={category.id} 
-                    className="cursor-pointer hover:shadow-elevated transition-shadow"
-                    onClick={() => setSelectedCategory(category.id)}
-                  >
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-3">
-                        <div className={`p-2 rounded-lg ${category.color}`}>
-                          <Icon className="h-5 w-5" />
-                        </div>
-                        {category.name}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-muted-foreground mb-3">
-                        {category.articles.length} articles available
-                      </p>
-                      <div className="space-y-2">
-                        {category.articles.slice(0, 2).map((article, idx) => (
-                          <div key={idx} className="text-sm">
-                            <div className="font-medium truncate">{article.title}</div>
-                            <div className="flex gap-2 mt-1">
-                              <Badge variant="outline" className={getDifficultyColor(article.difficulty)}>
-                                {article.difficulty}
-                              </Badge>
-                              <span className="text-xs text-muted-foreground self-center">{article.readTime}</span>
+            {availableCategories.length > 0 ? (
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
+                {availableCategories.map((category) => {
+                  const Icon = category.icon;
+                  const categoryArticles = publishedArticles.filter(article => article.category === category.name);
+                  return (
+                    <Card 
+                      key={category.id} 
+                      className="cursor-pointer hover:shadow-elevated transition-shadow"
+                      onClick={() => setSelectedCategory(category.id)}
+                    >
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-3">
+                          <div className={`p-2 rounded-lg ${category.color}`}>
+                            <Icon className="h-5 w-5" />
+                          </div>
+                          {category.name}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-muted-foreground mb-3">
+                          {categoryArticles.length} article{categoryArticles.length !== 1 ? 's' : ''} available
+                        </p>
+                        <div className="space-y-2">
+                          {categoryArticles.slice(0, 2).map((article, idx) => (
+                            <div key={idx} className="text-sm">
+                              <div className="font-medium truncate">{article.title}</div>
+                              <div className="flex gap-2 mt-1">
+                                <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/20">
+                                  Published
+                                </Badge>
+                                <span className="text-xs text-muted-foreground self-center">{article.reading_time || 5} min</span>
+                              </div>
                             </div>
-                          </div>
-                        ))}
-                        {category.articles.length > 2 && (
-                          <div className="text-xs text-muted-foreground">
-                            +{category.articles.length - 2} more articles
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
+                          ))}
+                          {categoryArticles.length > 2 && (
+                            <div className="text-xs text-muted-foreground">
+                              +{categoryArticles.length - 2} more article{categoryArticles.length - 2 !== 1 ? 's' : ''}
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <BookOpen className="h-16 w-16 text-muted-foreground/50 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No Articles Available Yet</h3>
+                <p className="text-muted-foreground max-w-md mx-auto">
+                  Articles are being prepared and will be published soon. Check back later for growing guides, tips, and tutorials.
+                </p>
+              </div>
+            )}
           </TabsContent>
 
-          {categories.map((category) => (
-            <TabsContent key={category.id} value={category.id}>
-              <div className="mb-6">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className={`p-3 rounded-lg ${category.color}`}>
-                    <category.icon className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-bold">{category.name}</h2>
-                    <p className="text-muted-foreground">{category.articles.length} articles in this category</p>
+          {availableCategories.map((category) => {
+            const categoryArticles = publishedArticles.filter(article => article.category === category.name);
+            return (
+              <TabsContent key={category.id} value={category.id}>
+                <div className="mb-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className={`p-3 rounded-lg ${category.color}`}>
+                      <category.icon className="h-6 w-6" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold">{category.name}</h2>
+                      <p className="text-muted-foreground">{categoryArticles.length} article{categoryArticles.length !== 1 ? 's' : ''} in this category</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </TabsContent>
-          ))}
+                
+                {categoryArticles.length > 0 ? (
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {categoryArticles.map((article) => (
+                      <Card 
+                        key={article.id} 
+                        className="cursor-pointer hover:shadow-elevated transition-shadow"
+                        onClick={() => navigate(`/learn/article/${article.id}`)}
+                      >
+                        <CardHeader className="pb-3">
+                          <div className="flex items-start justify-between gap-2">
+                            <CardTitle className="text-base leading-snug">{article.title}</CardTitle>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <span>{article.reading_time || 5} min</span>
+                            <span>•</span>
+                            <span>{article.category}</span>
+                          </div>
+                        </CardHeader>
+                        <CardContent className="pt-0">
+                          <div className="flex items-center gap-2 mb-3">
+                            <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/20">
+                              Published
+                            </Badge>
+                          </div>
+                          <div className="flex flex-wrap gap-1 mb-3">
+                            {(article.tags || []).slice(0, 3).map((tag: string, tagIdx: number) => (
+                              <Badge key={tagIdx} variant="secondary" className="text-xs">
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+                          {article.excerpt && (
+                            <div className="text-sm text-muted-foreground line-clamp-2 prose prose-sm dark:prose-invert max-w-none">
+                              <ReactMarkdown>{article.excerpt}</ReactMarkdown>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <BookOpen className="h-16 w-16 text-muted-foreground/50 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No Articles in {category.name} Yet</h3>
+                    <p className="text-muted-foreground max-w-md mx-auto">
+                      Articles for this category are being prepared and will be published soon.
+                    </p>
+                  </div>
+                )}
+              </TabsContent>
+            );
+          })}
         </Tabs>
 
         {/* Real Articles from Supabase */}
@@ -292,9 +365,9 @@ export default function Learn() {
                       ))}
                     </div>
                     {article.excerpt && (
-                      <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
-                        {article.excerpt}
-                      </p>
+                      <div className="text-sm text-muted-foreground mt-2 line-clamp-2 prose prose-sm dark:prose-invert max-w-none">
+                        <ReactMarkdown>{article.excerpt}</ReactMarkdown>
+                      </div>
                     )}
                   </CardContent>
                 </Card>
@@ -303,12 +376,12 @@ export default function Learn() {
           </div>
         )}
 
-        {/* Sample Articles */}
-        {(selectedCategory === 'all' || searchQuery) && (
+        {/* Show sample content only if no real articles exist and we're searching */}
+        {searchQuery && filteredRealArticles.length === 0 && filteredArticles.length > 0 && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">
-                Sample Content {searchQuery ? `(${filteredArticles.length})` : '(Coming Soon)'}
+                Sample Content ({filteredArticles.length})
               </h2>
             </div>
             
@@ -352,37 +425,14 @@ export default function Learn() {
           </div>
         )}
 
-        {/* Category-specific articles */}
-        {selectedCategory !== 'all' && !searchQuery && (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {categories.find(cat => cat.id === selectedCategory)?.articles.map((article, idx) => (
-              <Card 
-                key={idx} 
-                className="cursor-pointer hover:shadow-elevated transition-shadow"
-                onClick={() => navigate('/learn/sample')}
-              >
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base leading-snug">{article.title}</CardTitle>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <span>{article.readTime}</span>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Badge variant="outline" className={getDifficultyColor(article.difficulty)}>
-                      {article.difficulty}
-                    </Badge>
-                  </div>
-                  <div className="flex flex-wrap gap-1">
-                    {article.tags.slice(0, 3).map((tag, tagIdx) => (
-                      <Badge key={tagIdx} variant="secondary" className="text-xs">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+        {/* Empty state when no real articles match search */}
+        {searchQuery && filteredRealArticles.length === 0 && filteredArticles.length === 0 && (
+          <div className="text-center py-12">
+            <Search className="h-16 w-16 text-muted-foreground/50 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No Articles Found</h3>
+            <p className="text-muted-foreground max-w-md mx-auto">
+              No articles match your search query "{searchQuery}". Try different keywords or browse our categories.
+            </p>
           </div>
         )}
       </div>

@@ -415,7 +415,9 @@ export default function ArticleView({ articleId, onBack }: ArticleViewProps) {
             <Lightbulb className="h-5 w-5 text-primary" />
             Article Summary
           </h2>
-          <p className="text-sm">{article.excerpt}</p>
+          <div className="text-sm prose prose-sm dark:prose-invert max-w-none">
+            <ReactMarkdown>{article.excerpt}</ReactMarkdown>
+          </div>
         </div>
       )}
 

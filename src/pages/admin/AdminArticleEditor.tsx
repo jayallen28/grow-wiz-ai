@@ -291,19 +291,27 @@ export default function AdminArticleEditor() {
               </div>
 
               <div>
-                <Label htmlFor="excerpt">Excerpt</Label>
-                <Controller
-                  name="excerpt"
-                  control={control}
-                  render={({ field }) => (
-                    <Textarea
-                      {...field}
-                      placeholder="Brief description of the article..."
-                      className="mt-2"
-                      rows={3}
-                    />
-                  )}
-                />
+                <Label htmlFor="excerpt">Excerpt (Supports basic markdown: **bold**, [links](url))</Label>
+                <div className="mt-2">
+                  <Controller
+                    name="excerpt"
+                    control={control}
+                    render={({ field }) => (
+                      <MDEditor
+                        value={field.value}
+                        onChange={(value) => field.onChange(value || "")}
+                        height={150}
+                        preview="edit"
+                        visibleDragbar={false}
+                        hideToolbar={false}
+                        textareaProps={{
+                          placeholder: "Brief description of the article (supports **bold** and [links](url))...",
+                          style: { fontSize: 14, lineHeight: 1.5 }
+                        }}
+                      />
+                    )}
+                  />
+                </div>
               </div>
 
               <div>
@@ -316,7 +324,6 @@ export default function AdminArticleEditor() {
                       <MDEditor
                         value={field.value}
                         onChange={(value) => field.onChange(value || "")}
-                        data-color-mode="light"
                         height={500}
                         preview="edit"
                         visibleDragbar={false}
