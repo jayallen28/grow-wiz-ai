@@ -27,12 +27,8 @@ import { useToast } from "@/hooks/use-toast";
 export default function AdminArticles() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { articles, loading, deleteArticle, refetch } = useArticles();
+  const { articles, loading, error, deleteArticle } = useArticles();
   const [searchTerm, setSearchTerm] = useState("");
-
-  useEffect(() => {
-    refetch();
-  }, [refetch]);
 
   const getStatusBadge = (isPublished: boolean) => {
     return isPublished 

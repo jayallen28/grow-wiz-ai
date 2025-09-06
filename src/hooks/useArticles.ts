@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import { useAdminAuth } from './useAdminAuth';
 
 export interface Article {
   id: string;
@@ -32,36 +33,41 @@ export interface CreateArticleData {
 
 export function useArticles() {
   const { user } = useAuth();
+  const { isAdmin, loading: adminLoading } = useAdminAuth();
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchArticles();
-  }, []);
+    if (!adminLoading) {
+      fetchArticles();
+    }
+  }, [adminLoading, isAdmin]);
 
   const fetchArticles = async () => {
     try {
       setLoading(true);
       setError(null);
       
-      // First try to get all articles (works if user is admin)
-      let { data, error } = await supabase
-        .from('articles')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      // If access denied, try fetching only published articles
-      if (error && error.message?.includes('RLS')) {
-        console.log('Admin access denied, fetching published articles only');
-        const publishedResult = await supabase
+      let data, error;
+      
+      if (isAdmin) {
+        // Admin users can see all articles
+        const result = await supabase
+          .from('articles')
+          .select('*')
+          .order('created_at', { ascending: false });
+        data = result.data;
+        error = result.error;
+      } else {
+        // Regular users can only see published articles
+        const result = await supabase
           .from('articles')
           .select('*')
           .eq('is_published', true)
           .order('published_at', { ascending: false });
-        
-        data = publishedResult.data;
-        error = publishedResult.error;
+        data = result.data;
+        error = result.error;
       }
 
       if (error) throw error;
