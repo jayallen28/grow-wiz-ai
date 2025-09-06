@@ -419,7 +419,7 @@ export default function ArticleView({ articleId, onBack }: ArticleViewProps) {
         </div>
       )}
 
-      <div className="prose prose-lg max-w-none dark:prose-invert">
+      <div className="prose prose-lg max-w-none dark:prose-invert prose-headings:font-bold prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl prose-h4:text-lg prose-p:mb-4 prose-p:leading-relaxed prose-li:mb-2 prose-ul:mb-4 prose-ol:mb-4 prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-4 prose-blockquote:italic prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-muted prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto prose-img:rounded-lg prose-img:shadow-lg">
         <ReactMarkdown>{article.content}</ReactMarkdown>
       </div>
 

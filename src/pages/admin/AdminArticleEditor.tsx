@@ -28,6 +28,7 @@ import {
 import { useArticles } from "@/hooks/useArticles";
 import { useToast } from "@/hooks/use-toast";
 import { ImageUploadWithCompression } from "@/components/admin/ImageUploadWithCompression";
+import MDEditor from '@uiw/react-md-editor';
 
 const articleCategories = [
   "Growing Basics",
@@ -307,17 +308,26 @@ export default function AdminArticleEditor() {
 
               <div>
                 <Label htmlFor="content">Content</Label>
-                <Controller
-                  name="content"
-                  control={control}
-                  render={({ field }) => (
-                    <Textarea
-                      {...field}
-                      placeholder="Write your article content here... (Markdown supported)"
-                      className="mt-2 min-h-[400px]"
-                    />
-                  )}
-                />
+                <div className="mt-2">
+                  <Controller
+                    name="content"
+                    control={control}
+                    render={({ field }) => (
+                      <MDEditor
+                        value={field.value}
+                        onChange={(value) => field.onChange(value || "")}
+                        data-color-mode="light"
+                        height={500}
+                        preview="edit"
+                        visibleDragbar={false}
+                        textareaProps={{
+                          placeholder: "Write your article content here using Markdown...",
+                          style: { fontSize: 14, lineHeight: 1.5 }
+                        }}
+                      />
+                    )}
+                  />
+                </div>
                 {errors.content && (
                   <p className="text-sm text-destructive mt-1">{errors.content.message}</p>
                 )}
